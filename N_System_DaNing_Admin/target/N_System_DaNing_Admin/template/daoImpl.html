@@ -1,0 +1,182 @@
+package com.nowui.module.dao.impl;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.RowMapperResultSetExtractor;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.nowui.base.utility.Helper;
+import com.nowui.module.dao.${object.upperCaseName}Dao;
+import com.nowui.module.model.${object.upperCaseName};
+
+@Repository("${object.lowercaseName}Dao")
+public class ${object.upperCaseName}DaoImpl implements ${object.upperCaseName}Dao {
+
+	private class ${object.upperCaseName}RowMapper implements RowMapper<${object.upperCaseName}> {
+		public ${object.upperCaseName} mapRow(ResultSet rs, int number) throws SQLException {
+			${object.upperCaseName} ${object.lowercaseName} = new ${object.upperCaseName}();
+			${object.lowercaseName}.setId(rs.getInt("id"));
+			<%for(item in object.data) {%>
+				<%if(item.isDatabase) {%>
+					<%if(item.type == "Integer") {%>
+			${object.lowercaseName}.set${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}(rs.getInt("${item.key}"));
+					<%}else if(item.type == "Date") {%>
+			${object.lowercaseName}.set${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}(rs.getTimestamp("${item.key}"));
+					<%}else{%>
+			${object.lowercaseName}.set${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}(rs.getString("${item.key}"));
+					<%}%>
+				<%}else{%>
+			try {
+				${object.lowercaseName}.set${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}(rs.getString("${item.key}"));
+			} catch (Exception e) {
+
+			}
+				<%}%>
+			<%}%>
+			return ${object.lowercaseName};
+		}
+	}
+
+	@PersistenceContext
+	private EntityManager entityManager;
+
+	@Autowired
+	DataSource dataSource;
+
+	public Integer count(${object.upperCaseName} ${object.lowercaseName}) {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		StringBuffer sql = new StringBuffer("SELECT COUNT(*) FROM ${object.upperCaseName}_Info ");
+		Boolean isExit = false;
+
+		<%for(item in object.data) {%>
+			<%if(item.isSearch) {%>
+		if (!Helper.isNullOrEmpty(${object.lowercaseName}.get${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}())) {
+			if(isExit) {
+				sql.append(" AND ");
+			} else {
+				sql.append(" WHERE ");
+			}
+			sql.append("${item.key} LIKE :${item.key} ");
+			parameters.put("${item.key}", "%" + ${object.lowercaseName}.get${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}() + "%");
+
+			isExit = true;
+		}
+
+			<%}%>
+		<%}%>
+
+		NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+		return namedParameterJdbcTemplate.queryForObject(sql.toString(), parameters, Integer.class);
+	}
+
+	public List<${object.upperCaseName}> findList(${object.upperCaseName} ${object.lowercaseName}, Integer m, Integer n) {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		StringBuffer sql = new StringBuffer("SELECT * FROM ${object.upperCaseName}_Info ");
+		Boolean isExit = false;
+
+		<%for(item in object.data) {%>
+			<%if(item.isSearch) {%>
+		if (!Helper.isNullOrEmpty(${object.lowercaseName}.get${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}())) {
+			if(isExit) {
+				sql.append(" AND ");
+			} else {
+				sql.append(" WHERE ");
+			}
+			sql.append("${item.key} LIKE :${item.key} ");
+			parameters.put("${item.key}", "%" + ${object.lowercaseName}.get${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}() + "%");
+
+			isExit = true;
+		}
+
+			<%}%>
+		<%}%>
+
+		sql.append("ORDER BY id DESC ");
+		if (n > 0) {
+			sql.append("LIMIT :m, :n ");
+			parameters.put("m", m);
+			parameters.put("n", n);
+		}
+
+		NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+		return namedParameterJdbcTemplate.query(sql.toString(), parameters, new RowMapperResultSetExtractor<${object.upperCaseName}>(new ${object.upperCaseName}RowMapper()));
+	}
+
+	public ${object.upperCaseName} find(${object.upperCaseName} ${object.lowercaseName}) {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		StringBuffer sql = new StringBuffer("SELECT * FROM ${object.upperCaseName}_Info ");
+		Boolean isExit = false;
+
+		if (!Helper.isNullOrEmpty(${object.lowercaseName}.getId())) {
+			if(isExit) {
+				sql.append(" AND ");
+			} else {
+				sql.append(" WHERE ");
+			}
+			sql.append("id = :id ");
+			parameters.put("id", ${object.lowercaseName}.getId());
+
+			isExit = true;
+		}
+
+		NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+		List<${object.upperCaseName}> ${object.lowercaseName}List = namedParameterJdbcTemplate.query(sql.toString(), parameters, new RowMapperResultSetExtractor<${object.upperCaseName}>(new ${object.upperCaseName}RowMapper()));
+		if(${object.lowercaseName}List.size() == 0) {
+			return null;
+		} else {
+			return ${object.lowercaseName}List.get(0);
+		}
+	}
+
+	@Transactional
+	public void save(${object.upperCaseName} ${object.lowercaseName}) {
+		entityManager.persist(${object.lowercaseName});
+	}
+
+	@Transactional
+	public void update(${object.upperCaseName} ${object.lowercaseName}) {
+		entityManager.merge(${object.lowercaseName});
+	}
+
+	@Transactional
+	public void delete(${object.upperCaseName} ${object.lowercaseName}) {
+		StringBuffer sql = new StringBuffer("DELETE ${object.upperCaseName} ");
+
+		Boolean isExit = false;
+
+		if (!Helper.isNullOrEmpty(${object.lowercaseName}.getIdList())) {
+			if(isExit) {
+				sql.append(" AND ");
+			} else {
+				sql.append(" WHERE ");
+			}
+			sql.append("id IN :idList ");
+
+			isExit = true;
+		}
+
+		Query query = entityManager.createQuery(sql.toString());
+
+		if (!Helper.isNullOrEmpty(${object.lowercaseName}.getIdList())) {
+			query.setParameter("idList", ${object.lowercaseName}.getIdList());
+		}
+
+		if(isExit) {
+			query.executeUpdate();
+		}
+	}
+
+}

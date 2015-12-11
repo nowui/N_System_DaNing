@@ -1,0 +1,165 @@
+function ${object.lowercaseName}_index_function_load() {
+	${object.lowercaseName}_index_center_grid_model.deselectAll();
+
+	${object.lowercaseName}_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			<%for(item in object.data) {%>
+				<%if(item.isSearch) {%>
+			${item.key}: ${object.lowercaseName}_index_north_${item.key}.getValue()<%if(itemLP.index - 1 < object.searchCount) {%>,<%}%>
+				<%}%>
+			<%}%>
+		});
+	});
+
+	${object.lowercaseName}_index_center_grid_store.load();
+}
+
+function ${object.lowercaseName}_index_function_delete() {
+	var records = ${object.lowercaseName}_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/${object.lowercaseName}/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			${object.lowercaseName}_index_function_load();
+		}
+	});
+}
+
+var ${object.lowercaseName}_index_north_add = Ext.create("N_Button", {
+	id: "${object.lowercaseName}_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/${object.lowercaseName}/add",
+			params: {
+				titleName: Ext.getCmp("tab_${object.lowercaseName}_index").title,
+				iconCls: Ext.getCmp("tab_${object.lowercaseName}_index").iconCls,
+				closeActionFunction: "${object.lowercaseName}_index_function_load"
+			}
+		});
+	}
+});
+
+var ${object.lowercaseName}_index_north_delete = Ext.create("N_Button", {
+	id: "${object.lowercaseName}_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		${object.lowercaseName}_index_function_delete();
+	}
+});
+
+var ${object.lowercaseName}_index_north_refresh = Ext.create("N_Button", {
+	id: "${object.lowercaseName}_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		${object.lowercaseName}_index_function_load();
+	}
+});
+
+<%for(item in object.data) {%>
+	<%if(item.isSearch) {%>
+var ${object.lowercaseName}_index_north_${item.key} = Ext.create("N_Text", {
+	id: "${object.lowercaseName}_index_north_${item.key}",
+	fieldLabel: "${item.name}",
+	enterFunction: ${object.lowercaseName}_index_function_load
+});
+	<%}%>
+<%}%>
+
+var ${object.lowercaseName}_index_north = Ext.create("N_North", {
+	id: "${object.lowercaseName}_index_north",
+	region: "north",
+	tbar: [
+		${object.lowercaseName}_index_north_add,
+		"-",
+		${object.lowercaseName}_index_north_delete,
+		"-",
+		${object.lowercaseName}_index_north_refresh
+	],
+	items: [
+		<%for(item in object.data) {%>
+			<%if(item.isSearch) {%>
+		${object.lowercaseName}_index_north_${item.key}<%if(itemLP.index - 1 < object.searchCount) {%>,<%}%>
+			<%}%>
+		<%}%>
+	]
+});
+
+var ${object.lowercaseName}_index_center_grid_store = Ext.create("N_Store", {
+	id: "${object.lowercaseName}_index_center_grid_store",
+	model: "M_${object.upperCaseName}",
+    url: "/${object.lowercaseName}/json"
+});
+
+var ${object.lowercaseName}_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "${object.lowercaseName}_index_center_grid_model"
+});
+
+var ${object.lowercaseName}_index_center_grid = Ext.create("N_Grid", {
+	id: "${object.lowercaseName}_index_center_grid",
+	store: ${object.lowercaseName}_index_center_grid_store,
+	selModel: ${object.lowercaseName}_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+	<%for(item in object.data) {%>
+		<%if(item.isList) {%>
+   	}, {
+		dataIndex: "${item.key}",
+		header: "${item.name}",
+		sorttable: false,
+		width: columnWidth
+		<%}%>
+	<%}%>
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/${object.lowercaseName}/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					titleName: Ext.getCmp("tab_${object.lowercaseName}_index").title,
+					iconCls: Ext.getCmp("tab_${object.lowercaseName}_index").iconCls,
+					closeActionFunction: "${object.lowercaseName}_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var ${object.lowercaseName}_index_center = Ext.create("N_Panel", {
+	id: "${object.lowercaseName}_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [${object.lowercaseName}_index_center_grid]
+});
+
+var ${object.lowercaseName}_index = Ext.create("N_Panel", {
+	id: "${object.lowercaseName}_index",
+   	layout: "border",
+   	items: [
+   		${object.lowercaseName}_index_north,
+   		${object.lowercaseName}_index_center
+   	]
+});
+
+Ext.getCmp("tab_${object.lowercaseName}_index").add(${object.lowercaseName}_index).updateLayout();
+
+${object.lowercaseName}_index_function_load();

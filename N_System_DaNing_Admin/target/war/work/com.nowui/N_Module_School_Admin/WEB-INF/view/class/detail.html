@@ -1,0 +1,109 @@
+function class_detail_function_saveOrUpdate() {
+	if(class_detail_form.getForm().isValid()) {
+		ajaxRequest({
+			<%if(isEmpty(class)) {%>
+			url: "/class/save",
+			<%}else{%>
+			url: "/class/update",
+			<%}%>
+			params: {
+				id: class_detail_form_id.getValue(),
+				name: class_detail_form_name.getValue(),
+				sort: class_detail_form_sort.getValue(),
+				gradeId: class_detail_form_gradeId.getValue()
+			},
+			success: function(response) {
+				class_detail_function_close();
+
+<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+${backRequest.closeActionFunction}();
+<%}%>
+
+			}
+		});
+	}
+}
+
+function class_detail_function_close() {
+	class_detail.close();
+}
+
+var class_detail_save = Ext.create("N_Button", {
+	id: "class_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		class_detail_function_saveOrUpdate();
+	}
+});
+
+var class_detail_close = Ext.create("N_Button", {
+	id: "class_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		class_detail_function_close();
+	}
+});
+
+var class_detail_form_id = Ext.create("N_Hidden", {
+	id: "class_detail_form_id"
+});
+
+var class_detail_form_gradeId_store = Ext.create("N_Store", {
+	id: "class_detail_form_gradeId_store",
+	url: "/grade/combobox"
+});
+
+class_detail_form_gradeId_store.load();
+
+var class_detail_form_gradeId = Ext.create("N_ComboBox", {
+	id: "class_detail_form_gradeId",
+	store: class_detail_form_gradeId_store,
+	fieldLabel: "班级编号",
+	allowBlank: false
+});
+
+var class_detail_form_name = Ext.create("N_Text", {
+	id: "class_detail_form_name",
+	fieldLabel: "名称",
+	allowBlank: false,
+	enterFunction: class_detail_function_saveOrUpdate
+});
+
+var class_detail_form_sort = Ext.create("N_Number", {
+	id: "class_detail_form_sort",
+	fieldLabel: "排序",
+	allowBlank: false,
+	enterFunction: class_detail_function_saveOrUpdate
+});
+
+var class_detail_form = Ext.create("N_Form", {
+	id: "class_detail_form",
+	items: [
+		class_detail_form_id,
+		class_detail_form_gradeId,
+		class_detail_form_name,
+		class_detail_form_sort
+	]
+});
+
+var class_detail = Ext.create("N_Window", {
+	id: "class_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+title: "${backRequest.titleName}",
+<%}%>
+<%if(! isEmpty(backRequest.iconCls)) {%>
+iconCls: "${backRequest.iconCls}",
+<%}%>
+
+	tbar: [class_detail_save, "-", class_detail_close],
+	items: [class_detail_form]
+}).show();
+
+<%if(! isEmpty(class)) {%>
+class_detail_form_id.setValue("${class.id}");
+class_detail_form_name.setValue("${class.name}");
+class_detail_form_sort.setValue("${class.sort}");
+class_detail_form_gradeId.setValue("${class.gradeId}");
+<%}%>

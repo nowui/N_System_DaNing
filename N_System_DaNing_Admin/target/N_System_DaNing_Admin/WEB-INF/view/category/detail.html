@@ -1,0 +1,327 @@
+function category_detail_function_saveOrUpdate() {
+	if(category_detail_form.getForm().isValid()) {
+		ajaxRequest({
+			<%if(isEmpty(category)) {%>
+			url: "/category/save",
+			<%}else{%>
+			url: "/category/update",
+			<%}%>
+			params: {
+				id: category_detail_form_id.getValue(),
+				parentId: category_detail_form_parentId.getValue(),
+				name: category_detail_form_name.getValue(),
+				value: category_detail_form_value.getValue(),
+				value1: category_detail_form_value1.getValue(),
+				value2: category_detail_form_value2.getValue(),
+				value3: category_detail_form_value3.getValue(),
+				picture: category_detail_form_picture.getValue(),
+				sort: category_detail_form_sort.getValue(),
+				path: category_detail_form_path.getValue(),
+				summary: category_detail_form_summary.getValue(),
+				content: encodeURIComponent(category_detail_form_content.getValue())
+			},
+			success: function(response) {
+				category_detail_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}();
+				<%}%>
+			}
+		});
+	}
+}
+
+function category_detail_function_close() {
+	category_detail.close();
+}
+
+var category_detail_save = Ext.create("N_Button", {
+	id: "category_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		category_detail_function_saveOrUpdate();
+	}
+});
+
+var category_detail_close = Ext.create("N_Button", {
+	id: "category_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		category_detail_function_close();
+	}
+});
+
+var category_detail_form_id = Ext.create("N_Hidden", {
+	id: "category_detail_form_id"
+});
+
+var category_detail_form_parentId = Ext.create("N_Hidden", {
+	id: "category_detail_form_parentId",
+	value: "0"
+});
+
+var category_detail_form_name = Ext.create("N_Text", {
+	id: "category_detail_form_name",
+	fieldLabel: "名称",
+	allowBlank: false,
+	enterFunction: category_detail_function_saveOrUpdate
+});
+
+var category_detail_form_value = Ext.create("N_Text", {
+	id: "category_detail_form_value",
+	fieldLabel: "键值",
+	enterFunction: category_detail_function_saveOrUpdate
+});
+
+var category_detail_form_value1 = Ext.create("N_Text", {
+	id: "category_detail_form_value1",
+	fieldLabel: "键值1",
+	enterFunction: category_detail_function_saveOrUpdate
+});
+
+var category_detail_form_value2 = Ext.create("N_Text", {
+	id: "category_detail_form_value2",
+	fieldLabel: "键值2",
+	enterFunction: category_detail_function_saveOrUpdate
+});
+
+var category_detail_form_value3 = Ext.create("N_Text", {
+	id: "category_detail_form_value3",
+	fieldLabel: "键值3",
+	enterFunction: category_detail_function_saveOrUpdate
+});
+
+var category_detail_form_picture = Ext.create("N_Text", {
+	id: "category_detail_form_picture",
+	fieldLabel: "图片",
+	enterFunction: category_detail_function_saveOrUpdate
+});
+
+var category_detail_form_sort = Ext.create("N_Number", {
+	id: "category_detail_form_sort",
+	fieldLabel: "排序",
+	allowBlank: false,
+	enterFunction: category_detail_function_saveOrUpdate
+});
+
+var category_detail_form_path = Ext.create("N_Hidden", {
+	id: "category_detail_form_path"
+});
+
+var category_detail_form_summary = Ext.create("N_Text", {
+	id: "category_detail_form_summary",
+	fieldLabel: "摘要",
+	width: "100%",
+	enterFunction: category_detail_function_saveOrUpdate
+});
+
+var category_detail_form_content = Ext.create("N_HtmlEditor", {
+	id: "category_detail_form_content",
+	fieldLabel: "内容",
+	height: 190
+});
+
+var category_detail_form = Ext.create("N_Form", {
+	id: "category_detail_form",
+	<%if(! isEmpty(category)) {%>
+	title: "基本信息",
+	<%}%>
+	tbar: [category_detail_save, "-", category_detail_close],
+	items: [
+		category_detail_form_id,
+		category_detail_form_parentId,
+		category_detail_form_name,
+		category_detail_form_value,
+		category_detail_form_value1,
+		category_detail_form_value2,
+		category_detail_form_value3,
+		category_detail_form_picture,
+		category_detail_form_sort,
+		category_detail_form_path,
+		category_detail_form_summary,
+		category_detail_form_content
+	]
+});
+
+<%if(! isEmpty(category)) {%>
+ var category_detail_children_tree_store = Ext.create("N_TreeStore", {
+ 	id: "category_detail_children_tree_store",
+	url: "/category/children/json",
+	params: {
+		parentId: ${category.id}
+	},
+	root: {
+        text: "根节点",
+        id: '0',
+        expanded: true
+    }
+});
+
+function category_detail_function_children_load() {
+	category_detail_children_tree_store.load();
+}
+
+var category_detail_children_tree_menu_add = Ext.create("N_Action", {
+	id: "category_detail_children_tree_menu_add",
+	iconCls: "x-fa fa-plus-circle",
+    text: "新增",
+    handler: function(widget, event) {
+		loadScript({
+			url: "/category/children/add",
+			params: {
+				parentId: category_detail_children_tree_item_id,
+				<%if(! isEmpty(backRequest.titleName)) {%>
+				titleName: "${backRequest.titleName}",
+				<%}%>
+				<%if(! isEmpty(backRequest.iconCls)) {%>
+				iconCls: "${backRequest.iconCls}",
+				<%}%>
+				closeActionFunction: "category_detail_function_children_load"
+			}
+		});
+    }
+});
+
+var category_detail_children_tree_menu_edit = Ext.create("N_Action", {
+	id: "category_detail_children_tree_menu_edit",
+	iconCls: "x-fa fa-save",
+    text: "修改",
+    handler: function(widget, event) {
+		loadScript({
+			url: "/category/children/edit",
+			params: {
+				id: category_detail_children_tree_item_id,
+				<%if(! isEmpty(backRequest.titleName)) {%>
+				titleName: "${backRequest.titleName}",
+				<%}%>
+				<%if(! isEmpty(backRequest.iconCls)) {%>
+				iconCls: "${backRequest.iconCls}",
+				<%}%>
+				closeActionFunction: "category_detail_function_children_load"
+			}
+		});
+    }
+});
+
+var category_detail_children_tree_menu_del = Ext.create("N_Action", {
+	id: "category_detail_children_tree_menu_del",
+	iconCls: "x-fa fa-minus-circle",
+    text: "删除",
+    handler: function(widget, event) {
+		var ids = [];
+		ids.push(category_detail_children_tree_item_id);
+
+		ajaxRequest({
+			url: "/category/children/delete",
+			params: {
+				ids: Ext.JSON.encode(ids)
+			},
+			success: function(response) {
+				category_detail_function_children_load();
+			}
+	});
+    }
+});
+
+var category_detail_children_tree_menu = Ext.create("N_Menu", {
+	id: "category_detail_children_tree_menu",
+    items: [
+        category_detail_children_tree_menu_add,
+        category_detail_children_tree_menu_edit,
+        category_detail_children_tree_menu_del
+    ]
+});
+
+var category_detail_children_tree_item_id = -1;
+
+var category_detail_children_tree = Ext.create("N_Tree", {
+	id: "category_detail_children_tree",
+	rootVisible: true,
+	store: category_detail_children_tree_store,
+	listeners: {
+		itemcontextmenu: function(view, record, item, index, e) {
+			category_detail_children_tree_item_id = record.id;
+
+			if(category_detail_children_tree_item_id == 0) {
+				category_detail_children_tree_menu_edit.setDisabled(true);
+				category_detail_children_tree_menu_del.setDisabled(true);
+
+				category_detail_children_tree_item_id = category_detail_form_id.getValue();
+			} else {
+				category_detail_children_tree_menu_edit.setDisabled(false);
+				category_detail_children_tree_menu_del.setDisabled(false);
+			}
+
+
+
+            e.stopEvent();
+            category_detail_children_tree_menu.showAt(e.getXY());
+            return false;
+        }
+	},
+	onDestroy: function() {
+		category_detail_children_tree_menu.destroy();
+    },
+    columns: [{
+        xtype: "treecolumn",
+		dataIndex: "text",
+		header: "名称",
+		sorttable: false,
+		width: 300
+    },{
+		dataIndex: "value",
+		header: "键值",
+		sorttable: false,
+		width: 150
+    }]
+});
+
+var category_detail_children = Ext.create("N_Container", {
+	id: "category_detail_children",
+	title: "节点管理",
+	items: [category_detail_children_tree]
+});
+
+var category_detail_tab = Ext.create("N_Tab", {
+	id: "category_detail_tab",
+	plain: false,
+	items: [category_detail_form, category_detail_children]
+});
+<%}%>
+
+var category_detail = Ext.create("N_Window", {
+	id: "category_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+	title: "${backRequest.titleName}",
+	<%}%>
+	<%if(! isEmpty(backRequest.iconCls)) {%>
+	iconCls: "${backRequest.iconCls}",
+	<%}%>
+	<%if(! isEmpty(category)) {%>
+	items: [category_detail_tab],
+	<%}else{%>
+	items: [category_detail_form],
+	<%}%>
+	listeners: {
+        beforeclose: function() {
+
+        }
+    }
+}).show();
+
+<%if(! isEmpty(category)) {%>
+category_detail_form_id.setValue("${category.id}");
+category_detail_form_parentId.setValue("${category.parentId}");
+category_detail_form_name.setValue("${category.name}");
+category_detail_form_value.setValue("${category.value}");
+category_detail_form_value1.setValue("${category.value1}");
+category_detail_form_value2.setValue("${category.value2}");
+category_detail_form_value3.setValue("${category.value3}");
+category_detail_form_picture.setValue("${category.picture}");
+category_detail_form_sort.setValue("${category.sort}");
+category_detail_form_path.setValue("${category.path}");
+category_detail_form_summary.setValue("${category.summary}");
+category_detail_form_content.setValue(decodeURIComponent("${category.content}"));
+<%}%>

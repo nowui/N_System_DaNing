@@ -1,0 +1,160 @@
+function teacher_index_function_load() {
+	teacher_index_center_grid_model.deselectAll();
+
+	teacher_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			name: teacher_index_north_name.getValue()
+		});
+	});
+
+	teacher_index_center_grid_store.load();
+}
+
+function teacher_index_function_delete() {
+	var records = teacher_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/teacher/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			teacher_index_function_load();
+		}
+	});
+}
+
+var teacher_index_north_add = Ext.create("N_Button", {
+	id: "teacher_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/teacher/add",
+			params: {
+				closeActionFunction: "teacher_index_function_load"
+			}
+		});
+	}
+});
+
+var teacher_index_north_delete = Ext.create("N_Button", {
+	id: "teacher_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		teacher_index_function_delete();
+	}
+});
+
+var teacher_index_north_refresh = Ext.create("N_Button", {
+	id: "teacher_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		teacher_index_function_load();
+	}
+});
+
+var teacher_index_north_name = Ext.create("N_Text", {
+	id: "teacher_index_north_name",
+	fieldLabel: "名称",
+	enterFunction: teacher_index_function_load
+});
+
+var teacher_index_north = Ext.create("N_North", {
+	id: "teacher_index_north",
+	region: "north",
+	tbar: [
+		teacher_index_north_add,
+		"-",
+		teacher_index_north_delete,
+		"-",
+		teacher_index_north_refresh
+	],
+	items: [
+		teacher_index_north_name
+	]
+});
+
+var teacher_index_center_grid_store = Ext.create("N_Store", {
+	id: "teacher_index_center_grid_store",
+	model: "M_Teacher",
+    url: "/teacher/json"
+});
+
+var teacher_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "teacher_index_center_grid_model"
+});
+
+var teacher_index_center_grid = Ext.create("N_Grid", {
+	id: "teacher_index_center_grid",
+	store: teacher_index_center_grid_store,
+	selModel: teacher_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "account",
+		header: "帐号",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "departmentName",
+		header: "部门名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "postName",
+		header: "职位名称",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/teacher/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					closeActionFunction: "teacher_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var teacher_index_center = Ext.create("N_Panel", {
+	id: "teacher_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [teacher_index_center_grid]
+});
+
+var teacher_index = Ext.create("N_Panel", {
+	id: "teacher_index",
+   	layout: "border",
+   	items: [
+   		teacher_index_north,
+   		teacher_index_center
+   	]
+});
+
+Ext.getCmp("tab_teacher_index").add(teacher_index).updateLayout();
+
+teacher_index_function_load();

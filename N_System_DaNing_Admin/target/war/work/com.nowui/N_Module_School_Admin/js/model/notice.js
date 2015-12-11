@@ -1,0 +1,34 @@
+Ext.define("M_Notice", {
+	extend: "Ext.data.Model",
+	fields: [{
+		name: "id",
+		type: "int"
+	}, {
+		name: "categoryId",
+		type: "string"
+	}, {
+		name: "title",
+		type: "string"
+	}, {
+		name: "department",
+		type: "string"
+	}, {
+		name: "user",
+		type: "string"
+	}, {
+		name: "content",
+		type: "string"
+	}, {
+		name: "attachment",
+		type: "string"
+	}, {
+		name: "createTime",
+		type: "string"
+	}, {
+		name: "createUserId",
+		type: "string"
+	}, {
+		name: "reader",
+		type: "string"
+	}]
+});

@@ -1,0 +1,21 @@
+package com.nowui.module.dao;
+
+import java.util.List;
+
+import com.nowui.module.model.${object.upperCaseName};
+
+public interface ${object.upperCaseName}Dao {
+
+	public Integer count(${object.upperCaseName} ${object.lowercaseName});
+
+	public List<${object.upperCaseName}> findList(${object.upperCaseName} ${object.lowercaseName}, Integer m, Integer n);
+
+	public ${object.upperCaseName} find(${object.upperCaseName} ${object.lowercaseName});
+
+	public void save(${object.upperCaseName} ${object.lowercaseName});
+
+	public void update(${object.upperCaseName} ${object.lowercaseName});
+
+	public void delete(${object.upperCaseName} ${object.lowercaseName});
+
+}

@@ -1,0 +1,37 @@
+Ext.define("M_Maintenance", {
+	extend: "Ext.data.Model",
+	fields: [{
+		name: "id",
+		type: "int"
+	}, {
+		name: "classId",
+		type: "string"
+	}, {
+		name: "className",
+		type: "string"
+	}, {
+		name: "content",
+		type: "string"
+	}, {
+		name: "createTime",
+		type: "string"
+	}, {
+		name: "userId",
+		type: "string"
+	}, {
+		name: "userName",
+		type: "string"
+	}, {
+		name: "instanceId",
+		type: "string"
+	}, {
+		name: "instanceState",
+		type: "string"
+	}, {
+		name: "auditResult",
+		type: "string"
+	}, {
+		name: "stepName",
+		type: "string"
+	}]
+});

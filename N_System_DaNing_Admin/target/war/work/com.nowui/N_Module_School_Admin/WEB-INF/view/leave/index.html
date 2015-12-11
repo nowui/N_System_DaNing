@@ -1,0 +1,171 @@
+function leave_index_function_load() {
+	leave_index_center_grid_model.deselectAll();
+
+	leave_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+		});
+	});
+
+	leave_index_center_grid_store.load();
+}
+
+function leave_index_function_delete() {
+	var records = leave_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/leave/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			leave_index_function_load();
+		}
+	});
+}
+
+var leave_index_north_add = Ext.create("N_Button", {
+	id: "leave_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/leave/add",
+			params: {
+				titleName: Ext.getCmp("tab_leave_index").title,
+				iconCls: Ext.getCmp("tab_leave_index").iconCls,
+				closeActionFunction: "leave_index_function_load"
+			}
+		});
+	}
+});
+
+/*var leave_index_north_delete = Ext.create("N_Button", {
+	id: "leave_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		leave_index_function_delete();
+	}
+});*/
+
+var leave_index_north_refresh = Ext.create("N_Button", {
+	id: "leave_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		leave_index_function_load();
+	}
+});
+
+var leave_index_north = Ext.create("N_North", {
+	id: "leave_index_north",
+	region: "north",
+	tbar: [
+		leave_index_north_add,
+		/*"-",
+		leave_index_north_delete,*/
+		"-",
+		leave_index_north_refresh
+	],
+	items: [
+
+	]
+});
+
+var leave_index_center_grid_store = Ext.create("N_Store", {
+	id: "leave_index_center_grid_store",
+	model: "M_Leave",
+    url: "/leave/json"
+});
+
+var leave_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "leave_index_center_grid_model"
+});
+
+var leave_index_center_grid = Ext.create("N_Grid", {
+	id: "leave_index_center_grid",
+	store: leave_index_center_grid_store,
+	selModel: leave_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "type",
+		header: "类型",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterLeaveType"
+   	}, {
+		dataIndex: "starTime",
+		header: "开始时间",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterDay"
+   	}, {
+		dataIndex: "endTime",
+		header: "结束时间",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterDay"
+   	}, {
+		dataIndex: "day",
+		header: "天数",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "stepName",
+		header: "流程",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "auditResult",
+		header: "状态",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterFormAuditResult"
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/leave/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					titleName: Ext.getCmp("tab_leave_index").title,
+					iconCls: Ext.getCmp("tab_leave_index").iconCls,
+					closeActionFunction: "leave_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var leave_index_center = Ext.create("N_Panel", {
+	id: "leave_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [leave_index_center_grid]
+});
+
+var leave_index = Ext.create("N_Panel", {
+	id: "leave_index",
+   	layout: "border",
+   	items: [
+   		leave_index_north,
+   		leave_index_center
+   	]
+});
+
+Ext.getCmp("tab_leave_index").add(leave_index).updateLayout();
+
+leave_index_function_load();

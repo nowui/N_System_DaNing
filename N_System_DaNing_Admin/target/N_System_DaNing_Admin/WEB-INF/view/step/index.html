@@ -1,0 +1,162 @@
+function step_index_function_load() {
+	step_index_center_grid_model.deselectAll();
+
+	step_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+		});
+	});
+
+	step_index_center_grid_store.load();
+}
+
+function step_index_function_delete() {
+	var records = step_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/step/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			step_index_function_load();
+		}
+	});
+}
+
+var step_index_north_add = Ext.create("N_Button", {
+	id: "step_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/step/add",
+			params: {
+				titleName: Ext.getCmp("tab_step_index").title,
+				iconCls: Ext.getCmp("tab_step_index").iconCls,
+				closeActionFunction: "step_index_function_load"
+			}
+		});
+	}
+});
+
+var step_index_north_delete = Ext.create("N_Button", {
+	id: "step_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		step_index_function_delete();
+	}
+});
+
+var step_index_north_refresh = Ext.create("N_Button", {
+	id: "step_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		step_index_function_load();
+	}
+});
+
+
+var step_index_north = Ext.create("N_North", {
+	id: "step_index_north",
+	region: "north",
+	tbar: [
+		step_index_north_add,
+		"-",
+		step_index_north_delete,
+		"-",
+		step_index_north_refresh
+	],
+	items: [
+	]
+});
+
+var step_index_center_grid_store = Ext.create("N_Store", {
+	id: "step_index_center_grid_store",
+	model: "M_Step",
+    url: "/step/json"
+});
+
+var step_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "step_index_center_grid_model"
+});
+
+var step_index_center_grid = Ext.create("N_Grid", {
+	id: "step_index_center_grid",
+	store: step_index_center_grid_store,
+	selModel: step_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "value",
+		header: "键值",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "user",
+		header: "参与者",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "condition",
+		header: "条件",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "sort",
+		header: "排序",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/step/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					titleName: Ext.getCmp("tab_step_index").title,
+					iconCls: Ext.getCmp("tab_step_index").iconCls,
+					closeActionFunction: "step_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var step_index_center = Ext.create("N_Panel", {
+	id: "step_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [step_index_center_grid]
+});
+
+var step_index = Ext.create("N_Panel", {
+	id: "step_index",
+   	layout: "border",
+   	items: [
+   		step_index_north,
+   		step_index_center
+   	]
+});
+
+Ext.getCmp("tab_step_index").add(step_index).updateLayout();
+
+step_index_function_load();

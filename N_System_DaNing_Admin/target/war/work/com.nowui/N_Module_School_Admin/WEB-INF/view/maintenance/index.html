@@ -1,0 +1,158 @@
+function maintenance_index_function_load() {
+	maintenance_index_center_grid_model.deselectAll();
+
+	maintenance_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+		});
+	});
+
+	maintenance_index_center_grid_store.load();
+}
+
+function maintenance_index_function_delete() {
+	var records = maintenance_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/maintenance/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			maintenance_index_function_load();
+		}
+	});
+}
+
+var maintenance_index_north_add = Ext.create("N_Button", {
+	id: "maintenance_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/maintenance/add",
+			params: {
+				titleName: Ext.getCmp("tab_maintenance_index").title,
+				iconCls: Ext.getCmp("tab_maintenance_index").iconCls,
+				closeActionFunction: "maintenance_index_function_load"
+			}
+		});
+	}
+});
+
+/*var maintenance_index_north_delete = Ext.create("N_Button", {
+	id: "maintenance_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		maintenance_index_function_delete();
+	}
+});*/
+
+var maintenance_index_north_refresh = Ext.create("N_Button", {
+	id: "maintenance_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		maintenance_index_function_load();
+	}
+});
+
+
+var maintenance_index_north = Ext.create("N_North", {
+	id: "maintenance_index_north",
+	region: "north",
+	tbar: [
+		maintenance_index_north_add,
+		/*"-",
+		maintenance_index_north_delete,*/
+		"-",
+		maintenance_index_north_refresh
+	],
+	items: [
+	]
+});
+
+var maintenance_index_center_grid_store = Ext.create("N_Store", {
+	id: "maintenance_index_center_grid_store",
+	model: "M_Maintenance",
+    url: "/maintenance/json"
+});
+
+var maintenance_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "maintenance_index_center_grid_model"
+});
+
+var maintenance_index_center_grid = Ext.create("N_Grid", {
+	id: "maintenance_index_center_grid",
+	store: maintenance_index_center_grid_store,
+	selModel: maintenance_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "className",
+		header: "班级名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "createTime",
+		header: "创建时间",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "stepName",
+		header: "流程",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "auditResult",
+		header: "状态",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterFormAuditResult"
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/maintenance/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					titleName: Ext.getCmp("tab_maintenance_index").title,
+					iconCls: Ext.getCmp("tab_maintenance_index").iconCls,
+					closeActionFunction: "maintenance_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var maintenance_index_center = Ext.create("N_Panel", {
+	id: "maintenance_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [maintenance_index_center_grid]
+});
+
+var maintenance_index = Ext.create("N_Panel", {
+	id: "maintenance_index",
+   	layout: "border",
+   	items: [
+   		maintenance_index_north,
+   		maintenance_index_center
+   	]
+});
+
+Ext.getCmp("tab_maintenance_index").add(maintenance_index).updateLayout();
+
+maintenance_index_function_load();

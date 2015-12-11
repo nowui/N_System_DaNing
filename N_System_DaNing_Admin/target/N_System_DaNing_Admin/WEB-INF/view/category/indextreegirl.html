@@ -1,0 +1,168 @@
+function category_indextreegirl_function_load() {
+	category_indextreegirl_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+
+		});
+	});
+
+	category_indextreegirl_center_grid_store.load();
+}
+
+function category_indextreegirl_function_delete() {
+	var records = category_indextreegirl_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/category/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			category_indextreegirl_function_load();
+		}
+	});
+}
+
+var category_indextreegirl_north_refresh = Ext.create("N_Button", {
+	id: "category_indextreegirl_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		category_indextreegirl_function_load();
+	}
+});
+
+var category_indextreegirl_north = Ext.create("N_North", {
+	id: "category_indextreegirl_north",
+	region: "north",
+	tbar: [category_indextreegirl_north_refresh]
+});
+
+var category_indextreegirl_center_grid_menu_add = Ext.create("N_Action", {
+	id: "category_indextreegirl_center_grid_menu_add",
+	iconCls: "x-fa fa-plus-circle",
+    text: "新增",
+    handler: function(widget, event) {
+		loadScript({
+			url: "/category/children/add",
+			params: {
+				parentId: category_indextreegirl_center_grid_item_id,
+				titleName: Ext.getCmp("tab_category_indextreegirl").title,
+				iconCls: Ext.getCmp("tab_category_indextreegirl").iconCls,
+				closeActionFunction: "category_indextreegirl_function_load"
+			}
+		});
+    }
+});
+
+var category_indextreegirl_center_grid_menu_edit = Ext.create("N_Action", {
+	id: "category_indextreegirl_center_grid_menu_edit",
+	iconCls: "x-fa fa-save",
+    text: "修改",
+    handler: function(widget, event) {
+		loadScript({
+			url: "/category/children/edit",
+			params: {
+				id: category_indextreegirl_center_grid_item_id,
+				titleName: Ext.getCmp("tab_category_indextreegirl").title,
+				iconCls: Ext.getCmp("tab_category_indextreegirl").iconCls,
+				closeActionFunction: "category_indextreegirl_function_load"
+			}
+		});
+    }
+});
+
+var category_indextreegirl_center_grid_menu_del = Ext.create("N_Action", {
+	id: "category_indextreegirl_center_grid_menu_del",
+	iconCls: "x-fa fa-minus-circle",
+    text: "删除",
+    handler: function(widget, event) {
+		var ids = [];
+		ids.push(category_indextreegirl_center_grid_item_id);
+
+		ajaxRequest({
+			url: "/category/children/delete",
+			params: {
+				ids: Ext.JSON.encode(ids)
+			},
+			success: function(response) {
+				category_indextreegirl_function_load();
+			}
+	});
+    }
+});
+
+var category_indextreegirl_center_grid_menu = Ext.create("N_Menu", {
+	id: "category_indextreegirl_center_grid_menu",
+    items: [
+        category_indextreegirl_center_grid_menu_add,
+        category_indextreegirl_center_grid_menu_edit,
+        category_indextreegirl_center_grid_menu_del
+    ]
+});
+
+var category_indextreegirl_center_grid_item_id = -1;
+
+var category_indextreegirl_center_grid_store = Ext.create("N_TreeStore", {
+ 	id: "category_indextreegirl_center_grid_store",
+	url: "/category/indextreegirl/json",
+	params: {
+		parentId: ${categoryId}
+	}
+});
+
+var category_indextreegirl_center_grid = Ext.create("N_Tree", {
+	id: "category_indextreegirl_center_grid",
+	store: category_indextreegirl_center_grid_store,
+	listeners: {
+		itemcontextmenu: function(view, record, item, index, e) {
+			category_indextreegirl_center_grid_item_id = record.id;
+
+			if(category_indextreegirl_center_grid_item_id == ${categoryId}) {
+				category_indextreegirl_center_grid_menu_del.setDisabled(true);
+			} else {
+				category_indextreegirl_center_grid_menu_del.setDisabled(false);
+			}
+
+			e.stopEvent();
+            category_indextreegirl_center_grid_menu.showAt(e.getXY());
+            return false;
+        }
+	},
+	onDestroy: function() {
+		category_indextreegirl_center_grid_menu.destroy();
+    },
+    columns: [{
+        xtype: "treecolumn",
+		dataIndex: "text",
+		header: "名称",
+		sorttable: false,
+		width: 300
+    }]
+});
+
+var category_indextreegirl_center = Ext.create("N_Panel", {
+	id: "category_indextreegirl_center",
+	region: "center",
+   	layout: "fit",
+	items: [category_indextreegirl_center_grid]
+});
+
+var category_indextreegirl = Ext.create("N_Panel", {
+	id: "category_indextreegirl",
+   	layout: "border",
+   	items: [
+   		category_indextreegirl_north,
+   		category_indextreegirl_center
+   	]
+});
+
+Ext.getCmp("tab_category_indextreegirl").add(category_indextreegirl).updateLayout();

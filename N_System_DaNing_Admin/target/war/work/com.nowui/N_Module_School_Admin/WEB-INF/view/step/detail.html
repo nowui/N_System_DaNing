@@ -1,0 +1,395 @@
+function step_detail_function_saveOrUpdate() {
+	if(step_detail_form.getForm().isValid()) {
+
+		var userList = [];
+		for (var i = 0; i < step_detail_form_user_store.getCount(); i++) {
+			var record = step_detail_form_user_store.getAt(i);
+
+			userList.push({
+				name: record.get("name"),
+				type: record.get("type"),
+				value: record.get("value")
+			});
+		}
+
+		var requirementList = [];
+		for (var i = 0; i < step_detail_form_requirement_store.getCount(); i++) {
+			var record = step_detail_form_requirement_store.getAt(i);
+
+			requirementList.push({
+				name: record.get("name"),
+				type: record.get("type"),
+				value: record.get("value"),
+				compare: record.get("compare")
+			});
+		}
+
+		ajaxRequest({
+			<%if(isEmpty(step.id)) {%>
+			url: "/step/save",
+			<%}else{%>
+			url: "/step/update",
+			<%}%>
+			params: {
+				id: step_detail_form_id.getValue(),
+				workflowId: ${step.workflowId},
+				name: step_detail_form_name.getValue(),
+				value: step_detail_form_value.getValue(),
+				type: step_detail_form_type.getValue(),
+				user: Ext.JSON.encode(userList),
+				requirement: Ext.JSON.encode(requirementList),
+				sort: step_detail_form_sort.getValue()
+			},
+			success: function(response) {
+				step_detail_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}();
+				<%}%>
+
+			}
+		});
+	}
+}
+
+function step_detail_function_close() {
+	step_detail.close();
+}
+
+function step_detail_function_user_store_add(list) {
+	for(var i = 0; i < list.length; i++) {
+		var item = list[i];
+
+		if (typeof(item.type) == "undefined") {
+			item.type = "USER";
+		}
+
+		var value = item.value;
+
+		if (typeof(value) == "undefined") {
+			value = item.id;
+		}
+
+		var variable = new M_Variable({
+			name: item.name,
+			type: item.type,
+			value: value
+		});
+
+		step_detail_form_user_store.add(variable);
+	}
+}
+
+function step_detail_function_user_store_add2(variable) {
+	step_detail_form_user_store.add(variable);
+}
+
+function step_detail_function_user_store_del() {
+	var records = step_detail_form_user.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	step_detail_form_user_store.remove(records);
+}
+
+function step_detail_function_requirement_store_add(variable) {
+	step_detail_form_requirement_store.add(variable);
+}
+
+function step_detail_function_requirement_store_del() {
+	var records = step_detail_form_requirement.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	step_detail_form_requirement_store.remove(records);
+}
+
+var step_detail_save = Ext.create("N_Button", {
+	id: "step_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		step_detail_function_saveOrUpdate();
+	}
+});
+
+var step_detail_close = Ext.create("N_Button", {
+	id: "step_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		step_detail_function_close();
+	}
+});
+
+var step_detail_form_id = Ext.create("N_Hidden", {
+	id: "step_detail_form_id"
+});
+
+var step_detail_form_name = Ext.create("N_Text", {
+	id: "step_detail_form_name",
+	fieldLabel: "名称",
+	allowBlank: false,
+	enterFunction: step_detail_function_saveOrUpdate
+});
+
+var step_detail_form_value = Ext.create("N_Text", {
+	id: "step_detail_form_value",
+	fieldLabel: "键值",
+	enterFunction: step_detail_function_saveOrUpdate
+});
+
+var step_detail_form_type_store = Ext.create("Ext.data.Store", {
+	id: "step_detail_form_type_store",
+    fields: ["id", "name"],
+    data : [
+        {"id":"SERIAL", "name":"串签"},
+        {"id":"PARALLEL", "name":"并签"}
+    ]
+});
+
+var step_detail_form_type = Ext.create("N_ComboBox", {
+	id: "step_detail_form_type",
+	store: step_detail_form_type_store,
+	fieldLabel: "类型",
+	allowBlank: false
+});
+
+var step_detail_form_user_add = Ext.create("N_Button", {
+	id: "step_detail_form_user_add",
+	text: "添加人员",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/user/help",
+			params: {
+				closeActionFunction: "step_detail_function_user_store_add"
+			}
+		});
+	}
+});
+
+var step_detail_form_user_add2 = Ext.create("N_Button", {
+	id: "step_detail_form_user_add2",
+	text: "添加变量",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/variable/index",
+			params: {
+				closeActionFunction: "step_detail_function_user_store_add2"
+			}
+		});
+	}
+});
+
+var step_detail_form_user_del = Ext.create("N_Button", {
+	id: "step_detail_form_user_del",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		step_detail_function_user_store_del();
+	}
+});
+
+var step_detail_form_user_store = Ext.create("N_Store", {
+	id: "step_detail_form_user_store",
+	model: "M_Variable"
+});
+
+var step_detail_form_user_model = Ext.create("N_CheckboxModel", {
+	id: "step_detail_form_user_model"
+});
+
+var step_detail_form_user = Ext.create("N_Grid", {
+	id: "step_detail_form_user",
+	store: step_detail_form_user_store,
+	selModel: step_detail_form_user_model,
+	width: "100%",
+	height: 210,
+	isShowPage: false,
+	tbar: [
+		step_detail_form_user_add,
+		"-",
+		step_detail_form_user_add2,
+		"-",
+		step_detail_form_user_del
+	],
+	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "type",
+		header: "类型",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterVariableType"
+   	}],
+	listeners: {
+		itemdblclick: function() {
+
+		}
+	}
+});
+
+var step_detail_form_requirement_add = Ext.create("N_Button", {
+	id: "step_detail_form_requirement_add",
+	text: "添加变量",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/variable/index",
+			params: {
+				isRequirement: true,
+				closeActionFunction: "step_detail_function_requirement_store_add"
+			}
+		});
+	}
+});
+
+var step_detail_form_requirement_del = Ext.create("N_Button", {
+	id: "step_detail_form_requirement_del",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		step_detail_function_requirement_store_del();
+	}
+});
+
+var step_detail_form_requirement_store = Ext.create("N_Store", {
+	id: "step_detail_form_requirement_store",
+	model: "M_Variable"
+});
+
+var step_detail_form_requirement_model = Ext.create("N_CheckboxModel", {
+	id: "step_detail_form_requirement_model"
+});
+
+var step_detail_form_requirement = Ext.create("N_Grid", {
+	id: "step_detail_form_requirement",
+	store: step_detail_form_requirement_store,
+	selModel: step_detail_form_requirement_model,
+	width: "100%",
+	height: 210,
+	isShowPage: false,
+	tbar: [
+		step_detail_form_requirement_add,
+		"-",
+		step_detail_form_requirement_del
+	],
+	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "value",
+		header: "键值",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "compare",
+		header: "比较",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterVariableCompare"
+   	}],
+	listeners: {
+		itemdblclick: function() {
+
+		}
+	}
+});
+
+var step_detail_form_sort = Ext.create("N_Number", {
+	id: "step_detail_form_sort",
+	fieldLabel: "排序",
+	allowBlank: false,
+	enterFunction: step_detail_function_saveOrUpdate
+});
+
+var step_detail_form = Ext.create("N_Form", {
+	id: "step_detail_form",
+	items: [
+		step_detail_form_id,
+		step_detail_form_name,
+		step_detail_form_value,
+		step_detail_form_type,
+		step_detail_form_sort,
+		{
+			layout: "hbox",
+			margin: "0 0 10 0",
+			items: [{
+				xtype: "label",
+				margin: '10 0 0 0',
+				width: 75,
+				text: "参与人员"
+			}, {
+				flex: 1,
+				style: {
+					border: "1px",
+				    borderColor: "#d0d0d0",
+				    borderStyle: "solid"
+				},
+				items: [step_detail_form_user]
+			}]
+		},
+		{
+			layout: "hbox",
+			margin: "0 0 10 0",
+			items: [{
+				xtype: "label",
+				margin: '10 0 0 0',
+				width: 75,
+				text: "条件"
+			}, {
+				flex: 1,
+				style: {
+					border: "1px",
+				    borderColor: "#d0d0d0",
+				    borderStyle: "solid"
+				},
+				items: [step_detail_form_requirement]
+			}]
+		}
+	]
+});
+
+var step_detail = Ext.create("N_Window", {
+	id: "step_detail",
+	width: windowSecondWidth,
+	title: "流程节点",
+	iconCls: "x-fa fa-list-ul",
+	tbar: [step_detail_save, "-", step_detail_close],
+	items: [step_detail_form]
+}).show();
+
+<%if(! isEmpty(step.id)) {%>
+step_detail_form_id.setValue("${step.id}");
+step_detail_form_name.setValue("${step.name}");
+step_detail_form_value.setValue("${step.value}");
+step_detail_form_type.setValue("${step.type}");
+<%if(! isEmpty(step.user)) {%>
+step_detail_function_user_store_add(Ext.JSON.decode("${strutil.replace(step.user, "\"", "'")}"));
+<%}%>
+<%if(! isEmpty(step.requirement)) {%>
+step_detail_function_requirement_store_add(Ext.JSON.decode("${strutil.replace(step.requirement, "\"", "'")}"));
+<%}%>
+step_detail_form_sort.setValue("${step.sort}");
+<%}%>

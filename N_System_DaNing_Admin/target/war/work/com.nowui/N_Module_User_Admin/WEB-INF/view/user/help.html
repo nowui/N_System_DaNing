@@ -1,0 +1,162 @@
+function user_help_function_load() {
+	user_help_center_grid_model.deselectAll();
+
+	user_help_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			name: user_help_north_name.getValue()
+		});
+	});
+
+	user_help_center_grid_store.load();
+}
+
+function user_help_function_close() {
+	user_help.close();
+}
+
+var user_help_north_ok = Ext.create("N_Button", {
+	id: "user_help_north_ok",
+	text: "确定",
+	iconCls: "x-fa fa-check-circle",
+	handler: function() {
+		var records = user_help_center_grid.getSelectionModel().getSelection();
+
+		if(records.length == 0) {
+			return;
+		}
+
+		var list = [];
+		for(var i = 0; i < records.length; i++) {
+			var record = records[i];
+
+			list.push({
+				id: record.get("id"),
+				name: record.get("name")
+			});
+		}
+
+		user_help_function_close();
+
+		<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+		${backRequest.closeActionFunction}(list);
+		<%}%>
+	}
+});
+
+var user_help_north_refresh = Ext.create("N_Button", {
+	id: "user_help_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		user_help_function_load();
+	}
+});
+
+var user_help_north_close = Ext.create("N_Button", {
+	id: "user_help_north_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		user_help_function_close();
+	}
+});
+
+var user_help_north_name = Ext.create("N_Text", {
+	id: "user_help_north_name",
+	fieldLabel: "名称",
+	enterFunction: user_help_function_load
+});
+
+var user_help_north = Ext.create("N_North", {
+	id: "user_help_north",
+	region: "north",
+	tbar: [
+		user_help_north_ok,
+		"-",
+		user_help_north_refresh,
+		"-",
+		user_help_north_close
+	],
+	items: [
+		user_help_north_name
+	]
+});
+
+var user_help_center_grid_store = Ext.create("N_Store", {
+	id: "user_help_center_grid_store",
+	model: "M_User",
+    url: "/user/json"
+});
+
+var user_help_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "user_help_center_grid_model"
+});
+
+var user_help_center_grid = Ext.create("N_Grid", {
+	id: "user_help_center_grid",
+	store: user_help_center_grid_store,
+	selModel: user_help_center_grid_model,
+	singleSelect: true,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "departmentName",
+		header: "部门名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "postName",
+		header: "职位名称",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			var list = [];
+			list.push({
+				id: this.getSelectionModel().getLastSelected().get("id"),
+				name: this.getSelectionModel().getLastSelected().get("name")
+			});
+
+			user_help_function_close();
+
+			<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+			${backRequest.closeActionFunction}(list);
+			<%}%>
+		}
+	}
+});
+
+var user_help_center = Ext.create("N_Panel", {
+	id: "user_help_center",
+	region: "center",
+   	layout: "fit",
+	items: [user_help_center_grid]
+});
+
+var user_help = Ext.create("N_Window", {
+	id: "user_help",
+	width: windowSecondWidth,
+	title: "选择人员",
+	iconCls: "x-fa fa-list-ul",
+   	layout: "border",
+   	items: [
+   		user_help_north,
+   		user_help_center
+   	],
+	listeners: {
+        beforeclose: function() {
+
+        }
+    }
+}).show();
+
+user_help_function_load();

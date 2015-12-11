@@ -1,0 +1,46 @@
+Ext.define("M_Article", {
+	extend: "Ext.data.Model",
+	fields: [{
+		name: "id",
+		type: "int"
+	}, {
+		name: "title",
+		type: "string"
+	}, {
+		name: "categoryId",
+		type: "string"
+	}, {
+		name: "categoryName",
+		type: "string"
+	}, {
+		name: "keyword",
+		type: "string"
+	}, {
+		name: "picture",
+		type: "string"
+	}, {
+		name: "summary",
+		type: "string"
+	}, {
+		name: "content",
+		type: "string"
+	}, {
+		name: "state",
+		type: "string"
+	}, {
+		name: "createTime",
+		type: "string"
+	}, {
+		name: "createUserId",
+		type: "string"
+	}, {
+		name: "createUserName",
+		type: "string"
+	}, {
+		name: "auditUserId",
+		type: "string"
+	}, {
+		name: "auditUserName",
+		type: "string"
+	}]
+});

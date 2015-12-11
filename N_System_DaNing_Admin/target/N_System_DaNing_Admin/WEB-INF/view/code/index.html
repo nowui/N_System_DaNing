@@ -1,0 +1,272 @@
+function code_function_save() {
+	var isSave = true;
+
+	if(code_index_center_grid_store.getCount() == 0) {
+		isSave = false;
+	}
+
+	var data = [];
+	var isDate = false;
+	var isLob = false;
+	var isDatabase = true;
+	var searchCount = 0;
+	var listCount = 0;
+	var databaseCount = 0;
+
+	for (var i = 0; i < code_index_center_grid_store.getCount(); i++) {
+		var record = code_index_center_grid_store.getAt(i);
+
+		if(record.get("key") == "" || record.get("name") == "") {
+			isSave = false;
+		}
+
+		if(record.get("type") == "Date") {
+			isDate = true;
+		}
+
+		if(record.get("type") == "Lob") {
+			isLob = true;
+		}
+
+		if(!record.get("isDatabase")) {
+			isDatabase = false;
+		}
+
+		if(record.get("isDatabase") && record.get("isUpdate")) {
+			databaseCount++;
+		}
+
+		if(record.get("isSearch")) {
+			searchCount++;
+		}
+
+		if(record.get("isList")) {
+			listCount++;
+		}
+	}
+
+	if(! isSave) {
+		showMessage("请填写完整!");
+
+		return;
+	}
+
+	for (var i = 0; i < code_index_center_grid_store.getCount(); i++) {
+		var record = code_index_center_grid_store.getAt(i);
+
+		data.push({
+			key: record.get("key"),
+			name: record.get("name"),
+			type: record.get("type"),
+			component: record.get("component"),
+			isSearch: record.get("isSearch"),
+			isList: record.get("isList"),
+			isVisible: record.get("isVisible"),
+			isNull: record.get("isNull"),
+			isUpdate: record.get("isUpdate"),
+			isDatabase: record.get("isDatabase")
+		});
+	}
+
+	if(code_index_north.getForm().isValid()) {
+		ajaxRequest({
+			url: "/code/save",
+			params: {
+				name: code_index_north_name.getValue(),
+				package: code_index_north_package.getValue(),
+				isDate: isDate,
+				isLob: isLob,
+				isDatabase: isDatabase,
+				searchCount: searchCount,
+				listCount: listCount,
+				databaseCount: databaseCount,
+				data: data
+			},
+			success: function(response) {
+
+			}
+		});
+	}
+}
+
+var code_index_north_save = Ext.create("N_Button", {
+	id: "code_index_north_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		code_function_save();
+	}
+});
+
+var code_index_north_name = Ext.create("N_Text", {
+	id: "code_index_north_name",
+	fieldLabel: "名称",
+	allowBlank: false,
+	enterFunction: code_function_save
+});
+
+var code_index_north_package = Ext.create("N_Text", {
+	id: "code_index_north_package",
+	fieldLabel: "包名",
+	allowBlank: false,
+	enterFunction: code_function_save
+});
+
+var code_index_north = Ext.create("N_North", {
+	id: "code_index_north",
+	region: "north",
+	tbar: [
+		code_index_north_save
+	],
+	items: [
+		code_index_north_name,
+		code_index_north_package
+	]
+});
+
+var code_index_center_grid_add = Ext.create("N_Button", {
+	id: "code_index_center_grid_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		var code = new M_Code({
+			key: "",
+			name: "",
+			type: "String",
+			component: "TextBox",
+			isSearch: false,
+			isList: true,
+			isVisible: true,
+			isNull: true,
+			isUpdate: true,
+			isDatabase: true
+		});
+
+		code_index_center_grid_store.add(code);
+	}
+});
+
+var code_index_center_grid_del = Ext.create("N_Button", {
+	id: "code_index_center_grid_del",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		var records = code_index_center_grid.getSelectionModel().getSelection();
+
+		for(var i = 0; i < records.length; i++) {
+			var record = records[i];
+
+			code_index_center_grid_store.remove(record);
+		}
+	}
+});
+
+var code_index_center_grid_store = Ext.create("Ext.data.Store", {
+	id: "code_index_center_grid_store"
+});
+
+var code_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "code_index_center_grid_model"
+});
+
+var code_index_center_grid_cellEditing = new Ext.grid.plugin.CellEditing({
+    clicksToEdit: 1
+});
+
+var code_index_center_grid = Ext.create("N_Grid", {
+	id: "code_index_center_grid",
+	store: code_index_center_grid_store,
+	selModel: code_index_center_grid_model,
+	plugins: [code_index_center_grid_cellEditing],
+	columns: [{
+		dataIndex: "key",
+		header: "键值",
+        editor: {
+            allowBlank: false
+        },
+		width: 200
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+        editor: {
+            allowBlank: false
+        }
+   	}, {
+		dataIndex: "type",
+		header: "类型",
+        editor: new Ext.form.field.ComboBox({
+            triggerAction: 'all',
+            store: [
+                ["String", "String"],
+                ["Integer", "Integer"],
+                ["Double", "Double"],
+                ["Boolean", "Boolean"],
+                ["Date", "Date"],
+                ["Lob", "Lob"]
+            ],
+            allowBlank: false
+        })
+   	}, {
+		dataIndex: "component",
+		header: "控件",
+        editor: new Ext.form.field.ComboBox({
+            triggerAction: 'all',
+            store: [
+                ["TextBox", "TextBox"],
+                ["NumberBox", "NumberBox"],
+                ["ComboBox", "ComboBox"],
+                ["CalendarBox", "CalendarBox"],
+                ["EditorBox", "EditorBox"]
+            ],
+            allowBlank: false
+        })
+   	}, {
+		dataIndex: "isSearch",
+		header: "是否搜索",
+        xtype: 'checkcolumn'
+   	}, {
+		dataIndex: "isList",
+		header: "是否列表",
+        xtype: 'checkcolumn'
+   	}, {
+		dataIndex: "isVisible",
+		header: "是否显示",
+        xtype: 'checkcolumn'
+   	}, {
+		dataIndex: "isNull",
+		header: "是否必填",
+        xtype: 'checkcolumn'
+   	}, {
+		dataIndex: "isUpdate",
+		header: "是否更新",
+        xtype: 'checkcolumn'
+   	}, {
+		dataIndex: "isDatabase",
+		header: "是否存库",
+        xtype: 'checkcolumn'
+	}],
+   	tbar: [code_index_center_grid_add, "-", code_index_center_grid_del],
+	listeners: {
+		itemdblclick: function() {
+
+		}
+	}
+});
+
+var code_index_center = Ext.create("N_Panel", {
+	id: "code_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [code_index_center_grid]
+});
+
+var code_index = Ext.create("N_Panel", {
+	id: "code_index",
+   	layout: "border",
+   	items: [
+   		code_index_north,
+   		code_index_center
+   	]
+});
+
+Ext.getCmp("tab_code_index").add(code_index).updateLayout();

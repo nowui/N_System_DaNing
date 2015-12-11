@@ -1,0 +1,34 @@
+Ext.define("M_Leave", {
+	extend: "Ext.data.Model",
+	fields: [{
+		name: "id",
+		type: "int"
+	}, {
+		name: "type",
+		type: "string"
+	}, {
+		name: "starTime",
+		type: "string"
+	}, {
+		name: "endTime",
+		type: "string"
+	}, {
+		name: "content",
+		type: "string"
+	}, {
+		name: "createTime",
+		type: "string"
+	}, {
+		name: "userId",
+		type: "string"
+	}, {
+		name: "instanceId",
+		type: "string"
+	}, {
+		name: "instanceState",
+		type: "string"
+	}, {
+		name: "stepName",
+		type: "string"
+	}]
+});

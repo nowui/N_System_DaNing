@@ -1,0 +1,144 @@
+function resource_detail_function_saveOrUpdate() {
+	if(resource_detail_form.getForm().isValid()) {
+		ajaxRequest({
+<%if(isEmpty(resource)) {%>
+url: "/resource/save",
+<%}else{%>
+url: "/resource/update",
+<%}%>
+
+
+			params: {
+				id: resource_detail_form_id.getValue(),
+				name: resource_detail_form_name.getValue(),
+				type: resource_detail_form_type.getValue(),
+				value: resource_detail_form_value.getValue(),
+				size: resource_detail_form_size.getValue(),
+				folderId: resource_detail_form_folderId.getValue(),
+				createUserId: resource_detail_form_createUserId.getValue(),
+				createTime: resource_detail_form_createTime.getValue()
+			},
+			success: function(response) {
+				resource_detail_function_close();
+
+<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+${backRequest.closeActionFunction}();
+<%}%>
+
+			}
+		});
+	}
+}
+
+function resource_detail_function_close() {
+	resource_detail.close();
+}
+
+var resource_detail_save = Ext.create("N_Button", {
+	id: "resource_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		resource_detail_function_saveOrUpdate();
+	}
+});
+
+var resource_detail_close = Ext.create("N_Button", {
+	id: "resource_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		resource_detail_function_close();
+	}
+});
+
+var resource_detail_form_id = Ext.create("N_Hidden", {
+	id: "resource_detail_form_id"
+});
+
+var resource_detail_form_name = Ext.create("N_Text", {
+	id: "resource_detail_form_name",
+	fieldLabel: "名称",
+	allowBlank: false,
+	enterFunction: resource_detail_function_saveOrUpdate
+});
+
+var resource_detail_form_type = Ext.create("N_Text", {
+	id: "resource_detail_form_type",
+	fieldLabel: "类型",
+	allowBlank: false,
+	enterFunction: resource_detail_function_saveOrUpdate
+});
+
+var resource_detail_form_value = Ext.create("N_Text", {
+	id: "resource_detail_form_value",
+	fieldLabel: "键值",
+	allowBlank: false,
+	enterFunction: resource_detail_function_saveOrUpdate
+});
+
+var resource_detail_form_size = Ext.create("N_Number", {
+	id: "resource_detail_form_size",
+	fieldLabel: "大小",
+	allowBlank: false,
+	enterFunction: resource_detail_function_saveOrUpdate
+});
+
+var resource_detail_form_folderId = Ext.create("N_Number", {
+	id: "resource_detail_form_folderId",
+	fieldLabel: "文件夹编号",
+	allowBlank: false,
+	enterFunction: resource_detail_function_saveOrUpdate
+});
+
+var resource_detail_form_createUserId = Ext.create("N_Number", {
+	id: "resource_detail_form_createUserId",
+	fieldLabel: "创建人员",
+	allowBlank: false,
+	enterFunction: resource_detail_function_saveOrUpdate
+});
+
+var resource_detail_form_createTime = Ext.create("N_Date", {
+	id: "resource_detail_form_createTime",
+	fieldLabel: "创建时间",
+	allowBlank: false,
+	enterFunction: resource_detail_function_saveOrUpdate
+});
+
+var resource_detail_form = Ext.create("N_Form", {
+	id: "resource_detail_form",
+	items: [
+		resource_detail_form_id,
+		resource_detail_form_name,
+		resource_detail_form_type,
+		resource_detail_form_value,
+		resource_detail_form_size,
+		resource_detail_form_folderId,
+		resource_detail_form_createUserId,
+		resource_detail_form_createTime
+	]
+});
+
+var resource_detail = Ext.create("N_Window", {
+	id: "resource_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+title: "${backRequest.titleName}",
+<%}%>
+<%if(! isEmpty(backRequest.iconCls)) {%>
+iconCls: "${backRequest.iconCls}",
+<%}%>
+
+	tbar: [resource_detail_save, "-", resource_detail_close],
+	items: [resource_detail_form]
+}).show();
+
+<%if(! isEmpty(resource)) {%>
+resource_detail_form_id.setValue("${resource.id}");
+resource_detail_form_name.setValue("${resource.name}");
+resource_detail_form_type.setValue("${resource.type}");
+resource_detail_form_value.setValue("${resource.value}");
+resource_detail_form_size.setValue("${resource.size}");
+resource_detail_form_folderId.setValue("${resource.folderId}");
+resource_detail_form_createUserId.setValue("${resource.createUserId}");
+resource_detail_form_createTime.setValue("${resource.createTime}");
+<%}%>

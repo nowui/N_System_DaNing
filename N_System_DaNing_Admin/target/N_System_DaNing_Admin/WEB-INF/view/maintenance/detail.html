@@ -1,0 +1,254 @@
+function maintenance_detail_function_saveOrUpdate(isAudit) {
+	if(maintenance_detail_form.getForm().isValid()) {
+		ajaxRequest({
+			<%if(isEmpty(maintenance)) {%>
+			url: "/maintenance/save",
+			<%}else{%>
+			url: "/maintenance/update",
+			<%}%>
+			params: {
+				id: maintenance_detail_form_id.getValue(),
+				classId: maintenance_detail_form_classId.getValue(),
+				content: encodeURIComponent(maintenance_detail_form_content.getValue()),
+				isAudit: isAudit
+			},
+			success: function(response) {
+				maintenance_detail_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}();
+				<%}%>
+
+			}
+		});
+	}
+}
+
+function maintenance_detail_function_close() {
+	maintenance_detail.close();
+}
+
+<%if(isEmpty(maintenance) || maintenance.instanceState == "START") {%>
+var maintenance_detail_save = Ext.create("N_Button", {
+	id: "maintenance_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		maintenance_detail_function_saveOrUpdate();
+	}
+});
+
+var maintenance_detail_saveAndAudit = Ext.create("N_Button", {
+	id: "maintenance_detail_saveAndAudit",
+	text: "保存并且提交审核",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		maintenance_detail_function_saveOrUpdate(true);
+	}
+});
+<%}%>
+
+<%if(isAudit) {%>
+function maintenance_detail_function_audit(result) {
+	auditResult = "NO";
+
+	if(result) {
+		auditResult = "YES";
+	}
+
+	Ext.MessageBox.show({
+        title: "审批意见",
+        width: 300,
+        buttonText:{
+            yes: "确定",
+            no: "取消"
+        },
+        multiline: true,
+        scope: this,
+        fn: maintenance_detail_function_audit_submit
+    });
+}
+
+function maintenance_detail_function_audit_submit(btn, text) {
+	if(btn == "no") {
+		return;
+	}
+
+	var auditMessage = text;
+
+	ajaxRequest({
+		url: "/task/audit",
+		params: {
+			id: ${taskId},
+			auditResult: auditResult,
+			auditMessage: auditMessage
+		},
+		success: function(response) {
+			maintenance_detail_function_close();
+
+			<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+			${backRequest.closeActionFunction}();
+			<%}%>
+
+		}
+	});
+}
+
+var maintenance_detail_yes = Ext.create("N_Button", {
+	id: "maintenance_detail_yes",
+	text: "同意",
+	iconCls: "x-fa fa-check-circle",
+	handler: function() {
+		maintenance_detail_function_audit(true);
+	}
+});
+
+var maintenance_detail_no = Ext.create("N_Button", {
+	id: "maintenance_detail_no",
+	text: "拒绝",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		maintenance_detail_function_audit(false);
+	}
+});
+<%}%>
+
+var maintenance_detail_close = Ext.create("N_Button", {
+	id: "maintenance_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		maintenance_detail_function_close();
+	}
+});
+
+var maintenance_detail_form_id = Ext.create("N_Hidden", {
+	id: "maintenance_detail_form_id"
+});
+
+var maintenance_detail_form_classId_store = Ext.create("N_Store", {
+	id: "maintenance_detail_form_classId_store",
+	url: "/class/combobox"
+});
+
+maintenance_detail_form_classId_store.load();
+
+var maintenance_detail_form_classId = Ext.create("N_ComboBox", {
+	id: "maintenance_detail_form_classId",
+	store: maintenance_detail_form_classId_store,
+	fieldLabel: "班级编号",
+	allowBlank: false,
+	enterFunction: maintenance_detail_function_saveOrUpdate
+});
+
+var maintenance_detail_form_content = Ext.create("N_TextArea", {
+	id: "maintenance_detail_form_content",
+	fieldLabel: "内容",
+	allowBlank: false,
+	width: "100%",
+	height: 150
+});
+
+<%if(! isEmpty(maintenance) && ((maintenance.instanceState != "START" || (maintenance.instanceState == "START" && maintenance.auditResult == "NO")))) {%>
+var maintenance_detail_form_workflow_store = Ext.create("N_Store", {
+	id: "maintenance_detail_form_workflow_store",
+	model: "M_History",
+    url: "/history/json"
+});
+
+function maintenance_detail_function_workflow_store_load() {
+	maintenance_detail_form_workflow_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			instanceId: ${maintenance.instanceId}
+		});
+	});
+
+	maintenance_detail_form_workflow_store.load();
+}
+
+maintenance_detail_function_workflow_store_load();
+
+var maintenance_detail_form_workflow = Ext.create("N_Grid", {
+	id: "maintenance_detail_form_workflow",
+	store: maintenance_detail_form_workflow_store,
+	width: "100%",
+	height: 230,
+	isShowPage: false,
+	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "stepName",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "userName",
+		header: "人员",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "auditResult",
+		header: "意见",
+		sorttable: false,
+		flex: 1
+   	}, {
+		dataIndex: "createTime",
+		header: "时间",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+
+		}
+	}
+});
+<%}%>
+
+var maintenance_detail_form = Ext.create("N_Form", {
+	id: "maintenance_detail_form",
+	items: [
+		maintenance_detail_form_id,
+		maintenance_detail_form_classId,
+		maintenance_detail_form_content<%if(! isEmpty(maintenance) && ((maintenance.instanceState != "START" || (maintenance.instanceState == "START" && maintenance.auditResult == "NO")))) {%>,
+		{
+			layout: "hbox",
+			margin: "0 0 10 0",
+			items: [{
+				xtype: "label",
+				margin: '10 0 0 0',
+				width: 75,
+				text: "流程"
+			}, {
+				flex: 1,
+				style: {
+					border: "1px",
+				    borderColor: "#d0d0d0",
+				    borderStyle: "solid"
+				},
+				items: [maintenance_detail_form_workflow]
+			}]
+		}<%}%>
+	]
+});
+
+var maintenance_detail = Ext.create("N_Window", {
+	id: "maintenance_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+	title: "${backRequest.titleName}",
+	<%}%>
+	<%if(! isEmpty(backRequest.iconCls)) {%>
+	iconCls: "${backRequest.iconCls}",
+	<%}%>
+	tbar: [<%if(isEmpty(maintenance) || maintenance.instanceState == "START") {%>maintenance_detail_save, "-", maintenance_detail_saveAndAudit, "-", <%}%><%if(isAudit) {%>maintenance_detail_yes, "-", maintenance_detail_no, "-", <%}%>maintenance_detail_close],
+	items: [maintenance_detail_form]
+}).show();
+
+<%if(! isEmpty(maintenance)) {%>
+maintenance_detail_form_id.setValue("${maintenance.id}");
+maintenance_detail_form_classId.setValue("${maintenance.classId}");
+maintenance_detail_form_content.setValue(decodeURIComponent("${maintenance.content}"));
+<%}%>

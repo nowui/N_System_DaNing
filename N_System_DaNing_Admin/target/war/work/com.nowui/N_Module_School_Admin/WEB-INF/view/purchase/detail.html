@@ -1,0 +1,267 @@
+function purchase_detail_function_saveOrUpdate(isAudit) {
+	if(purchase_detail_form.getForm().isValid()) {
+		ajaxRequest({
+			<%if(isEmpty(purchase)) {%>
+			url: "/purchase/save",
+			<%}else{%>
+			url: "/purchase/update",
+			<%}%>
+			params: {
+				id: purchase_detail_form_id.getValue(),
+				classId: purchase_detail_form_classId.getValue(),
+				money: purchase_detail_form_money.getValue(),
+				content: encodeURIComponent(purchase_detail_form_content.getValue()),
+				isAudit: isAudit
+			},
+			success: function(response) {
+				purchase_detail_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}();
+				<%}%>
+
+			}
+		});
+	}
+}
+
+function purchase_detail_function_close() {
+	purchase_detail.close();
+}
+
+<%if(isEmpty(purchase) || purchase.instanceState == "START") {%>
+var purchase_detail_save = Ext.create("N_Button", {
+	id: "purchase_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		purchase_detail_function_saveOrUpdate();
+	}
+});
+
+var purchase_detail_saveAndAudit = Ext.create("N_Button", {
+	id: "purchase_detail_saveAndAudit",
+	text: "保存并且提交审核",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		purchase_detail_function_saveOrUpdate(true);
+	}
+});
+<%}%>
+
+<%if(isAudit) {%>
+function purchase_detail_function_audit(result) {
+	auditResult = "NO";
+
+	if(result) {
+		auditResult = "YES";
+	}
+
+	Ext.MessageBox.show({
+        title: "审批意见",
+        width: 300,
+        buttonText:{
+            yes: "确定",
+            no: "取消"
+        },
+        multiline: true,
+        scope: this,
+        fn: purchase_detail_function_audit_submit
+    });
+}
+
+function purchase_detail_function_audit_submit(btn, text) {
+	if(btn == "no") {
+		return;
+	}
+
+	var auditMessage = text;
+
+	ajaxRequest({
+		url: "/task/audit",
+		params: {
+			id: ${taskId},
+			auditResult: auditResult,
+			auditMessage: auditMessage
+		},
+		success: function(response) {
+			purchase_detail_function_close();
+
+			<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+			${backRequest.closeActionFunction}();
+			<%}%>
+
+		}
+	});
+}
+
+var purchase_detail_yes = Ext.create("N_Button", {
+	id: "purchase_detail_yes",
+	text: "同意",
+	iconCls: "x-fa fa-check-circle",
+	handler: function() {
+		purchase_detail_function_audit(true);
+	}
+});
+
+var purchase_detail_no = Ext.create("N_Button", {
+	id: "purchase_detail_no",
+	text: "拒绝",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		purchase_detail_function_audit(false);
+	}
+});
+<%}%>
+
+var purchase_detail_close = Ext.create("N_Button", {
+	id: "purchase_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		purchase_detail_function_close();
+	}
+});
+
+var purchase_detail_form_id = Ext.create("N_Hidden", {
+	id: "purchase_detail_form_id"
+});
+
+var purchase_detail_form_classId_store = Ext.create("N_Store", {
+	id: "purchase_detail_form_classId_store",
+	url: "/class/combobox"
+});
+
+purchase_detail_form_classId_store.load();
+
+var purchase_detail_form_classId = Ext.create("N_ComboBox", {
+	id: "purchase_detail_form_classId",
+	store: purchase_detail_form_classId_store,
+	fieldLabel: "班级编号",
+	allowBlank: false,
+	enterFunction: purchase_detail_function_saveOrUpdate
+});
+
+var purchase_detail_form_money = Ext.create("N_Number", {
+	id: "purchase_detail_form_money",
+	fieldLabel: "金额",
+	allowBlank: false,
+	allowDecimals: true,
+	decimalPrecision: 2,
+	enterFunction: purchase_detail_function_saveOrUpdate,
+	value: ""
+});
+
+var purchase_detail_form_content = Ext.create("N_TextArea", {
+	id: "purchase_detail_form_content",
+	fieldLabel: "内容",
+	allowBlank: false,
+	width: "100%",
+	height: 150
+});
+
+<%if(! isEmpty(purchase) && ((purchase.instanceState != "START" || (purchase.instanceState == "START" && purchase.auditResult == "NO")))) {%>
+var purchase_detail_form_workflow_store = Ext.create("N_Store", {
+	id: "purchase_detail_form_workflow_store",
+	model: "M_History",
+    url: "/history/json"
+});
+
+function purchase_detail_function_workflow_store_load() {
+	purchase_detail_form_workflow_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			instanceId: ${purchase.instanceId}
+		});
+	});
+
+	purchase_detail_form_workflow_store.load();
+}
+
+purchase_detail_function_workflow_store_load();
+
+var purchase_detail_form_workflow = Ext.create("N_Grid", {
+	id: "purchase_detail_form_workflow",
+	store: purchase_detail_form_workflow_store,
+	width: "100%",
+	height: 230,
+	isShowPage: false,
+	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "stepName",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "userName",
+		header: "人员",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "auditResult",
+		header: "意见",
+		sorttable: false,
+		flex: 1
+   	}, {
+		dataIndex: "createTime",
+		header: "时间",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+
+		}
+	}
+});
+<%}%>
+
+var purchase_detail_form = Ext.create("N_Form", {
+	id: "purchase_detail_form",
+	items: [
+		purchase_detail_form_id,
+		purchase_detail_form_classId,
+		purchase_detail_form_money,
+		purchase_detail_form_content<%if(! isEmpty(purchase) && ((purchase.instanceState != "START" || (purchase.instanceState == "START" && purchase.auditResult == "NO")))) {%>,
+		{
+			layout: "hbox",
+			margin: "0 0 10 0",
+			items: [{
+				xtype: "label",
+				margin: '10 0 0 0',
+				width: 75,
+				text: "流程"
+			}, {
+				flex: 1,
+				style: {
+					border: "1px",
+				    borderColor: "#d0d0d0",
+				    borderStyle: "solid"
+				},
+				items: [purchase_detail_form_workflow]
+			}]
+		}<%}%>
+	]
+});
+
+var purchase_detail = Ext.create("N_Window", {
+	id: "purchase_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+	title: "${backRequest.titleName}",
+	<%}%>
+	<%if(! isEmpty(backRequest.iconCls)) {%>
+	iconCls: "${backRequest.iconCls}",
+	<%}%>
+	tbar: [<%if(isEmpty(purchase) || purchase.instanceState == "START") {%>purchase_detail_save, "-", purchase_detail_saveAndAudit, "-", <%}%><%if(isAudit) {%>purchase_detail_yes, "-", purchase_detail_no, "-", <%}%>purchase_detail_close],
+	items: [purchase_detail_form]
+}).show();
+
+<%if(! isEmpty(purchase)) {%>
+purchase_detail_form_id.setValue("${purchase.id}");
+purchase_detail_form_classId.setValue("${purchase.classId}");
+purchase_detail_form_money.setValue("${purchase.money}");
+purchase_detail_form_content.setValue(decodeURIComponent("${purchase.content}"));
+<%}%>

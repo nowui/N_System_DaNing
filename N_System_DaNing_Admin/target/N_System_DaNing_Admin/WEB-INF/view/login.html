@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>上海市闸北区大宁国际学校办公系统</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1">
+	<link rel="stylesheet" type="text/css" href="/css/theme-triton-all_1.css" />
+	<link rel="stylesheet" type="text/css" href="/css/theme-triton-all_2.css" />
+	<link rel="stylesheet" type="text/css" href="/css/font-awesome-all.css" />
+	<link rel="stylesheet" type="text/css" href="/css/font-pictos-all.css" />
+	<link rel="stylesheet" type="text/css" href="/css/app.css" />
+    <script src="/js/ext-all.js"></script>
+    <script src="/js/theme-triton.js"></script>
+    <script src="/js/model.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/component.js"></script>
+
+    <style type="text/css">
+		.x-window-header-title-default > .x-title-icon-wrap-default > .x-title-icon-default {
+		    background-position: center center;
+		    height: 2px;
+		    width: 16px;
+		}
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+	Ext.onReady(function() {
+		Ext.tip.QuickTipManager.init();
+
+		var login_window_function_login = function() {
+
+			if(login_window_form.getForm().isValid()) {
+				mask();
+
+				Ext.Ajax.request({
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json;charset=utf-8"
+					},
+					url: "/check",
+					params: Ext.JSON.encode({
+						type: "TEACHER",
+						account: login_window_form_account.getValue(),
+						password: login_window_form_password.getValue()
+					}),
+					success: function(response) {
+						var data = Ext.JSON.decode(response.responseText);
+
+						if(data.result) {
+							window.location.href = "/index";
+						} else {
+							unmask();
+
+							showMessage(data.message.replace("java.lang.Exception:", ""));
+						}
+					},
+					failure: function(response) {
+						unmask();
+
+						showError();
+					}
+				});
+			}
+		}
+
+		var login_window_login = Ext.create("N_Button", {
+			id: "login_window_login",
+			text: "登录",
+			iconCls: "x-fa fa-lock",
+			handler: function() {
+				login_window_function_login();
+			}
+		});
+
+		var login_window_reset = Ext.create("N_Button", {
+			id: "login_window_reset",
+			text: "重置",
+			iconCls: "x-fa fa-recycle",
+			handler: function() {
+				login_window_form.getForm().reset();
+			}
+		});
+
+		var login_window_form_account = Ext.create("N_Text", {
+			id: "login_window_form_account",
+			fieldLabel: "帐号",
+			allowBlank: false,
+			enterFunction: login_window_function_login
+		});
+
+		var login_window_form_password = Ext.create("N_Text", {
+			id: "login_window_form_password",
+			fieldLabel: "密码",
+			allowBlank: false,
+			inputType: "password",
+			enterFunction: login_window_function_login
+		});
+
+		var login_window_form = Ext.create("N_Form", {
+			id: "login_window_form",
+			items: [
+				login_window_form_account,
+				login_window_form_password
+			]
+		});
+
+		var login_window = Ext.create("N_Window", {
+			id: "login_window",
+			title: "上海市闸北区大宁国际学校",
+			iconCls: "x-fa fa-user",
+			modal: false,
+			closable: false,
+			maximizable: false,
+			width: 320,
+			height: 185,
+			tbar: [login_window_login, login_window_reset],
+			items: [login_window_form]
+		}).show();
+
+	});
+</script>
+</body>
+</html>

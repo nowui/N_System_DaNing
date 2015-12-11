@@ -1,0 +1,60 @@
+package com.nowui.module.service.impl;
+
+<%if(object.isDate) {%>
+import java.util.Date;
+<%}%>
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.nowui.base.utility.Helper;
+import com.nowui.module.dao.${object.upperCaseName}Dao;
+import com.nowui.module.model.${object.upperCaseName};
+import com.nowui.module.service.${object.upperCaseName}Service;
+
+@Service("${object.lowercaseName}Service")
+public class ${object.upperCaseName}ServiceImpl implements ${object.upperCaseName}Service {
+
+	@Autowired
+	private ${object.upperCaseName}Dao ${object.lowercaseName}Dao;
+
+	public Integer count(${object.upperCaseName} ${object.lowercaseName}) throws Exception {
+		return ${object.lowercaseName}Dao.count(${object.lowercaseName});
+	}
+
+	public List<${object.upperCaseName}> findList(${object.upperCaseName} ${object.lowercaseName}, Integer page, Integer limit) throws Exception {
+		return ${object.lowercaseName}Dao.findList(${object.lowercaseName}, Helper.checkStar(page, limit), Helper.checkEnd(limit));
+	}
+
+	public ${object.upperCaseName} find(${object.upperCaseName} ${object.lowercaseName}) throws Exception {
+		return ${object.lowercaseName}Dao.find(${object.lowercaseName});
+	}
+
+	public void save(${object.upperCaseName} ${object.lowercaseName}) throws Exception {
+		<%for(item in object.data) {%>
+			<%if(! item.isUpdate) {%>
+		if(Helper.isNullOrEmpty(${object.lowercaseName}.get${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}())) {
+				<%if(item.type == "Integer") {%>
+			${object.lowercaseName}.set${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}(0);
+				<%}else if(item.type == "Date") {%>
+			${object.lowercaseName}.set${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}(new Date());
+				<%}else{%>
+			${object.lowercaseName}.set${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}("");
+				<%}%>
+		}
+
+			<%}%>
+		<%}%>
+		${object.lowercaseName}Dao.save(${object.lowercaseName});
+	}
+
+	public void update(${object.upperCaseName} ${object.lowercaseName}) throws Exception {
+		${object.lowercaseName}Dao.update(${object.lowercaseName});
+	}
+
+	public void delete(${object.upperCaseName} ${object.lowercaseName}) throws Exception {
+		${object.lowercaseName}Dao.delete(${object.lowercaseName});
+	}
+
+}

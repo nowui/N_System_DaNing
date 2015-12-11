@@ -1,0 +1,124 @@
+function history_detail_function_saveOrUpdate() {
+	if(history_detail_form.getForm().isValid()) {
+		ajaxRequest({
+<%if(isEmpty(history)) {%>
+url: "/history/save",
+<%}else{%>
+url: "/history/update",
+<%}%>
+
+
+			params: {
+				id: history_detail_form_id.getValue(),
+				instanceId: history_detail_form_instanceId.getValue(),
+				userId: history_detail_form_userId.getValue(),
+				auditResult: history_detail_form_auditResult.getValue(),
+				auditMessage: history_detail_form_auditMessage.getValue(),
+				createTime: history_detail_form_createTime.getValue()
+			},
+			success: function(response) {
+				history_detail_function_close();
+
+<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+${backRequest.closeActionFunction}();
+<%}%>
+
+			}
+		});
+	}
+}
+
+function history_detail_function_close() {
+	history_detail.close();
+}
+
+var history_detail_save = Ext.create("N_Button", {
+	id: "history_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		history_detail_function_saveOrUpdate();
+	}
+});
+
+var history_detail_close = Ext.create("N_Button", {
+	id: "history_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		history_detail_function_close();
+	}
+});
+
+var history_detail_form_id = Ext.create("N_Hidden", {
+	id: "history_detail_form_id"
+});
+
+var history_detail_form_instanceId = Ext.create("N_Number", {
+	id: "history_detail_form_instanceId",
+	fieldLabel: "实例编号",
+	allowBlank: false,
+	enterFunction: history_detail_function_saveOrUpdate
+});
+
+var history_detail_form_userId = Ext.create("N_Number", {
+	id: "history_detail_form_userId",
+	fieldLabel: "用户编号",
+	allowBlank: false,
+	enterFunction: history_detail_function_saveOrUpdate
+});
+
+var history_detail_form_auditResult = Ext.create("N_Text", {
+	id: "history_detail_form_auditResult",
+	fieldLabel: "审核结果",
+	allowBlank: false,
+	enterFunction: history_detail_function_saveOrUpdate
+});
+
+var history_detail_form_auditMessage = Ext.create("N_Text", {
+	id: "history_detail_form_auditMessage",
+	fieldLabel: "审核意见",
+	allowBlank: false,
+	enterFunction: history_detail_function_saveOrUpdate
+});
+
+var history_detail_form_createTime = Ext.create("N_Date", {
+	id: "history_detail_form_createTime",
+	fieldLabel: "创建时间",
+	allowBlank: false,
+	enterFunction: history_detail_function_saveOrUpdate
+});
+
+var history_detail_form = Ext.create("N_Form", {
+	id: "history_detail_form",
+	items: [
+		history_detail_form_id,
+		history_detail_form_instanceId,
+		history_detail_form_userId,
+		history_detail_form_auditResult,
+		history_detail_form_auditMessage,
+		history_detail_form_createTime
+	]
+});
+
+var history_detail = Ext.create("N_Window", {
+	id: "history_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+title: "${backRequest.titleName}",
+<%}%>
+<%if(! isEmpty(backRequest.iconCls)) {%>
+iconCls: "${backRequest.iconCls}",
+<%}%>
+
+	tbar: [history_detail_save, "-", history_detail_close],
+	items: [history_detail_form]
+}).show();
+
+<%if(! isEmpty(history)) {%>
+history_detail_form_id.setValue("${history.id}");
+history_detail_form_instanceId.setValue("${history.instanceId}");
+history_detail_form_userId.setValue("${history.userId}");
+history_detail_form_auditResult.setValue("${history.auditResult}");
+history_detail_form_auditMessage.setValue("${history.auditMessage}");
+history_detail_form_createTime.setValue("${history.createTime}");
+<%}%>

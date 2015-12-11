@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.nowui</groupId>
+    <artifactId>N_System_DaNing</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>N_System_DaNing_Admin</artifactId>
+  <packaging>war</packaging>
+  <name>N_System_DaNing_Admin Maven Webapp</name>
+  <url>http://maven.apache.org</url>
+
+	<dependencies>
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_System_DaNing_Controller</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_Category_Admin</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+      		<type>war</type>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_User_Controller</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_User_Admin</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+      		<type>war</type>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_School_Admin</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+      		<type>war</type>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_Log_Controller</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_Log_Admin</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+      		<type>war</type>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_CMS_Admin</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+      		<type>war</type>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_Resource_Controller</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_Resource_Admin</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+      		<type>war</type>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_Code_Admin</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+      		<type>war</type>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Common_Admin</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+      		<type>war</type>
+		</dependency>
+	</dependencies>
+
+  <build>
+    <finalName>N_System_DaNing_Admin</finalName>
+  </build>
+</project>

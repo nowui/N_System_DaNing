@@ -1,0 +1,358 @@
+function notice_${value}_detail_function_saveOrUpdate(isPush) {
+	if(notice_${value}_detail_form.getForm().isValid()) {
+		var departmentList = [];
+		for (var i = 0; i < notice_${value}_detail_form_department_store.getCount(); i++) {
+			var record = notice_${value}_detail_form_department_store.getAt(i);
+
+			departmentList.push({
+				id: record.get("id"),
+				name: record.get("name")
+			});
+		}
+
+		var userList = [];
+		for (var i = 0; i < notice_${value}_detail_form_user_store.getCount(); i++) {
+			var record = notice_${value}_detail_form_user_store.getAt(i);
+
+			userList.push({
+				id: record.get("id"),
+				name: record.get("name")
+			});
+		}
+
+		ajaxRequest({
+			<%if(isEmpty(notice)) {%>
+			url: "/notice/save",
+			<%}else{%>
+			url: "/notice/update",
+			<%}%>
+			params: {
+				id: notice_${value}_detail_form_id.getValue(),
+				<%if(isEmpty(notice)) {%>
+				categoryId: ${categoryId},
+				<%}else{%>
+				categoryId: ${notice.categoryId},
+				<%}%>
+				title: notice_${value}_detail_form_title.getValue(),
+				department: Ext.JSON.encode(departmentList),
+				user: Ext.JSON.encode(userList),
+				content: encodeURIComponent(notice_${value}_detail_form_content.getValue()),
+				attachment: notice_${value}_detail_form_attachment.getValue(),
+				isPush: isPush
+			},
+			success: function(response) {
+				notice_${value}_detail_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}();
+				<%}%>
+			}
+		});
+	}
+}
+
+function notice_${value}_detail_function_close() {
+	notice_${value}_detail.close();
+}
+
+function notice_${value}_detail_function_department_store_add(list) {
+	for(var i = 0; i < list.length; i++) {
+		var item = list[i];
+
+		var category = new M_Category({
+			id: item.id,
+			name: item.name
+		});
+
+		notice_${value}_detail_form_department_store.add(category);
+	}
+}
+
+function notice_${value}_detail_function_department_store_del() {
+	var records = notice_${value}_detail_form_department.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	notice_${value}_detail_form_department_store.remove(records);
+}
+
+function notice_${value}_detail_function_user_store_add(list) {
+	for(var i = 0; i < list.length; i++) {
+		var item = list[i];
+
+		var user = new M_User({
+			id: item.id,
+			name: item.name
+		});
+
+		notice_${value}_detail_form_user_store.add(user);
+	}
+}
+
+function notice_${value}_detail_function_user_store_del() {
+	var records = notice_${value}_detail_form_user.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	notice_${value}_detail_form_user_store.remove(records);
+}
+
+<%if(isEdit) {%>
+var notice_${value}_detail_save = Ext.create("N_Button", {
+	id: "notice_${value}_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		notice_${value}_detail_function_saveOrUpdate();
+	}
+});
+
+var notice_${value}_detail_saveAndPush = Ext.create("N_Button", {
+	id: "notice_${value}_detail_saveAndPush",
+	text: "保存并且推送消息",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		notice_${value}_detail_function_saveOrUpdate(true)
+	}
+});
+<%}%>
+
+var notice_${value}_detail_close = Ext.create("N_Button", {
+	id: "notice_${value}_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		notice_${value}_detail_function_close();
+	}
+});
+
+var notice_${value}_detail_form_id = Ext.create("N_Hidden", {
+	id: "notice_${value}_detail_form_id"
+});
+
+var notice_${value}_detail_form_title = Ext.create("N_Text", {
+	id: "notice_${value}_detail_form_title",
+	width: "100%",
+	fieldLabel: "标题",
+	allowBlank: false,
+	enterFunction: notice_${value}_detail_function_saveOrUpdate
+});
+
+<%if(isEdit) {%>
+var notice_${value}_detail_form_department_add = Ext.create("N_Button", {
+	id: "notice_${value}_detail_form_department_add",
+	text: "添加部门",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/category/help",
+			params: {
+				value: "category_department",
+				titleName: "选择部门",
+				closeActionFunction: "notice_${value}_detail_function_department_store_add"
+			}
+		});
+	}
+});
+
+var notice_${value}_detail_form_department_del = Ext.create("N_Button", {
+	id: "notice_${value}_detail_form_department_del",
+	text: "删除部门",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		notice_${value}_detail_function_department_store_del();
+	}
+});
+
+var notice_${value}_detail_form_department_store = Ext.create("N_Store", {
+	id: "notice_${value}_detail_form_department_store",
+	model: "M_Category",
+    url: "/category/json"
+});
+
+var notice_${value}_detail_form_department_model = Ext.create("N_CheckboxModel", {
+	id: "notice_${value}_detail_form_department_model"
+});
+
+var notice_${value}_detail_form_department = Ext.create("N_Grid", {
+	id: "notice_${value}_detail_form_department",
+	store: notice_${value}_detail_form_department_store,
+	selModel: notice_${value}_detail_form_department_model,
+	width: "100%",
+	height: 230,
+	isShowPage: false,
+	tbar: [
+		notice_${value}_detail_form_department_add,
+		"-",
+		notice_${value}_detail_form_department_del
+	],
+	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+
+		}
+	}
+});
+
+var notice_${value}_detail_form_user_add = Ext.create("N_Button", {
+	id: "notice_${value}_detail_form_user_add",
+	text: "添加人员",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/user/help",
+			params: {
+				closeActionFunction: "notice_${value}_detail_function_user_store_add"
+			}
+		});
+	}
+});
+
+var notice_${value}_detail_form_user_del = Ext.create("N_Button", {
+	id: "notice_${value}_detail_form_user_del",
+	text: "删除人员",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		notice_${value}_detail_function_user_store_del();
+	}
+});
+
+var notice_${value}_detail_form_user_store = Ext.create("N_Store", {
+	id: "notice_${value}_detail_form_user_store",
+	model: "M_Category",
+    url: "/category/json"
+});
+
+var notice_${value}_detail_form_user_model = Ext.create("N_CheckboxModel", {
+	id: "notice_${value}_detail_form_user_model"
+});
+
+var notice_${value}_detail_form_user = Ext.create("N_Grid", {
+	id: "notice_${value}_detail_form_user",
+	store: notice_${value}_detail_form_user_store,
+	selModel: notice_${value}_detail_form_user_model,
+	width: "100%",
+	height: 230,
+	isShowPage: false,
+	tbar: [
+		notice_${value}_detail_form_user_add,
+		"-",
+		notice_${value}_detail_form_user_del
+	],
+	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+
+		}
+	}
+});
+<%}%>
+
+var notice_${value}_detail_form_content = Ext.create("N_HtmlEditor", {
+	id: "notice_${value}_detail_form_content",
+	fieldLabel: "内容"
+});
+
+var notice_${value}_detail_form_attachment = Ext.create("N_Hidden", {
+	id: "notice_${value}_detail_form_attachment",
+	fieldLabel: "附件"
+});
+
+var notice_${value}_detail_form = Ext.create("N_Form", {
+	id: "notice_${value}_detail_form",
+	items: [
+		notice_${value}_detail_form_id,
+		notice_${value}_detail_form_title,
+		<%if(isEdit) {%>{
+			layout: "hbox",
+			margin: "0 0 10 0",
+			items: [{
+				xtype: "label",
+				margin: '15 0 0 0',
+				width: 75,
+				text: "接收部门"
+			}, {
+				flex: 1,
+				style: {
+					border: "1px",
+				    borderColor: "#d0d0d0",
+				    borderStyle: "solid"
+				},
+				items: [notice_${value}_detail_form_department]
+			}]
+		}, {
+			layout: "hbox",
+			margin: "0 0 10 0",
+			items: [{
+				xtype: "label",
+				margin: '10 0 0 0',
+				width: 75,
+				text: "接收人员"
+			}, {
+				flex: 1,
+				style: {
+					border: "1px",
+				    borderColor: "#d0d0d0",
+				    borderStyle: "solid"
+				},
+				items: [notice_${value}_detail_form_user]
+			}]
+		},<%}%>
+		notice_${value}_detail_form_content,
+		notice_${value}_detail_form_attachment
+	]
+});
+
+var notice_${value}_detail = Ext.create("N_Window", {
+	id: "notice_${value}_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+	title: "${backRequest.titleName}",
+	<%}%>
+	<%if(! isEmpty(backRequest.iconCls)) {%>
+	iconCls: "${backRequest.iconCls}",
+	<%}%>
+	tbar: [<%if(isEdit) {%>notice_${value}_detail_save, "-", notice_${value}_detail_saveAndPush, "-", <%}%>notice_${value}_detail_close],
+	items: [notice_${value}_detail_form],
+	listeners: {
+        beforeclose: function() {
+
+        }
+    }
+}).show();
+
+<%if(! isEmpty(notice)) {%>
+notice_${value}_detail_form_id.setValue("${notice.id}");
+notice_${value}_detail_form_title.setValue("${notice.title}");
+<%if(! isEmpty(notice.department)) {%>
+notice_${value}_detail_function_department_store_add(Ext.JSON.decode("${strutil.replace(notice.department, "\"", "'")}"));
+<%}%>
+<%if(! isEmpty(notice.user)) {%>
+notice_${value}_detail_function_user_store_add(Ext.JSON.decode("${strutil.replace(notice.user, "\"", "'")}"));
+<%}%>
+notice_${value}_detail_form_content.setValue(decodeURIComponent("${notice.content}"));
+notice_${value}_detail_form_attachment.setValue("${notice.attachment}");
+<%}%>

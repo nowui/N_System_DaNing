@@ -1,0 +1,149 @@
+function category_help_function_load() {
+	category_help_center_grid_model.deselectAll();
+
+	category_help_center_grid_store.load();
+}
+
+function category_help_function_close() {
+	category_help.close();
+}
+
+var category_help_north_ok = Ext.create("N_Button", {
+	id: "category_help_north_ok",
+	text: "确定",
+	iconCls: "x-fa fa-check-circle",
+	handler: function() {
+		var records = category_help_center_grid.getSelectionModel().getSelection();
+
+		if(records.length == 0) {
+			return;
+		}
+
+		var list = [];
+		for(var i = 0; i < records.length; i++) {
+			var record = records[i];
+
+			if(record.get("leaf")) {
+				list.push({
+					id: record.get("id"),
+					name: record.get("text")
+				});
+			}
+		}
+
+		if(list.length > 0) {
+			category_help_function_close();
+
+			<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+			${backRequest.closeActionFunction}(list);
+			<%}%>
+		}
+	}
+});
+
+var category_help_north_refresh = Ext.create("N_Button", {
+	id: "category_help_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		category_help_function_load();
+	}
+});
+
+var category_help_north_close = Ext.create("N_Button", {
+	id: "category_help_north_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		category_help_function_close();
+	}
+});
+
+var category_help_north = Ext.create("N_North", {
+	id: "category_help_north",
+	region: "north",
+	tbar: [
+		category_help_north_ok,
+		"-",
+		category_help_north_refresh,
+		"-",
+		category_help_north_close
+	]
+});
+
+var category_help_center_grid_store = Ext.create("N_TreeStore", {
+ 	id: "category_help_center_grid_store",
+	url: "/category/help/json",
+	params: {
+		parentId: ${categoryId}
+	}
+});
+
+var category_help_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "category_help_center_grid_model"
+});
+
+var category_help_center_grid = Ext.create("N_Tree", {
+	id: "category_help_center_grid",
+	store: category_help_center_grid_store,
+	selModel: category_help_center_grid_model,
+    columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+        xtype: "treecolumn",
+		dataIndex: "text",
+		header: "名称",
+		sorttable: false,
+		width: 300
+    }],
+	listeners: {
+		itemdblclick: function() {
+			if(this.getSelectionModel().getLastSelected().get("leaf")) {
+				var list = [];
+				list.push({
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					name: this.getSelectionModel().getLastSelected().get("text")
+				});
+
+				category_help_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}(list);
+				<%}%>
+			}
+		}
+	}
+});
+
+var category_help_center = Ext.create("N_Panel", {
+	id: "category_help_center",
+	region: "center",
+   	layout: "fit",
+	items: [category_help_center_grid]
+});
+
+var category_help = Ext.create("N_Window", {
+	id: "category_help",
+	width: windowSecondWidth,
+	<%if(! isEmpty(backRequest.titleName)) {%>
+	title: "${backRequest.titleName}",
+	<%}%>
+	<%if(! isEmpty(backRequest.iconCls)) {%>
+	iconCls: "${backRequest.iconCls}",
+	<%}else{%>
+	iconCls: "x-fa fa-list-ul",
+	<%}%>
+   	layout: "border",
+   	items: [
+   		category_help_north,
+   		category_help_center
+   	],
+	listeners: {
+        beforeclose: function() {
+
+        }
+    }
+}).show();

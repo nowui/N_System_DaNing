@@ -1,0 +1,249 @@
+package com.nowui.module.web;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.alibaba.fastjson.JSON;
+import com.nowui.base.request.impl.BackRequestImpl;
+import com.nowui.base.response.impl.BaseResponseImpl;
+import com.nowui.module.model.${object.upperCaseName};
+import com.nowui.module.model.Log;
+import com.nowui.module.model.LogType;
+import com.nowui.module.service.${object.upperCaseName}Service;
+import com.nowui.module.service.LogService;
+
+@Controller
+@RequestMapping("/${object.lowercaseName}")
+public class ${object.upperCaseName}Controller {
+
+	@Autowired
+	private ${object.upperCaseName}Service ${object.lowercaseName}Service;
+
+	@Autowired
+	private LogService logService;
+
+	@RequestMapping(value = "/index", method = RequestMethod.POST)
+	public ModelAndView index(@RequestBody String parameter, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+		Log log = new Log();
+		log.setHttpSession(session);
+		log.setRequest(request);
+		log.setAction("/${object.lowercaseName}/index");
+		log.setParameter(parameter);
+		log.setType(LogType.INFO.toString());
+		log.setContent("");
+
+		try {
+			logService.save(log);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return new ModelAndView("/${object.lowercaseName}/index");
+	}
+
+	@RequestMapping(value = "/json", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> json(@RequestBody String parameter, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+		Log log = new Log();
+		log.setHttpSession(session);
+		log.setRequest(request);
+		log.setAction("/${object.lowercaseName}/json");
+		log.setParameter(parameter);
+
+		try {
+			log.setType(LogType.INFO.toString());
+			log.setContent("");
+
+			BackRequestImpl backRequest = (BackRequestImpl) JSON.parseObject(parameter, BackRequestImpl.class);
+			${object.upperCaseName} ${object.lowercaseName}Json = (${object.upperCaseName}) JSON.parseObject(parameter, ${object.upperCaseName}.class);
+
+			Integer total = ${object.lowercaseName}Service.count(${object.lowercaseName}Json);
+			List<${object.upperCaseName}> ${object.lowercaseName}List = ${object.lowercaseName}Service.findList(${object.lowercaseName}Json, backRequest.getPage(), backRequest.getLimit());
+
+			return new BaseResponseImpl(true, "", total, ${object.lowercaseName}List).build();
+		} catch (Exception e) {
+			log.setType(LogType.ERROR.toString());
+			log.setContent(e.toString());
+
+			return new BaseResponseImpl(false, e.toString(), null).build();
+		} finally {
+			try {
+				logService.save(log);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@RequestMapping(value = "/add", method = RequestMethod.POST)
+	public ModelAndView add(@RequestBody String parameter, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+		Log log = new Log();
+		log.setHttpSession(session);
+		log.setRequest(request);
+		log.setAction("/${object.lowercaseName}/add");
+		log.setParameter(parameter);
+		log.setType(LogType.INFO.toString());
+		log.setContent("");
+
+		try {
+			logService.save(log);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		BackRequestImpl backRequest = (BackRequestImpl) JSON.parseObject(parameter, BackRequestImpl.class);
+		map.put("backRequest", backRequest);
+
+		return new ModelAndView("/${object.lowercaseName}/detail", map);
+	}
+
+	@RequestMapping(value = "/edit", method = RequestMethod.POST)
+	public ModelAndView edit(@RequestBody String parameter, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+		Log log = new Log();
+		log.setHttpSession(session);
+		log.setRequest(request);
+		log.setAction("/${object.lowercaseName}/edit");
+		log.setParameter(parameter);
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			log.setType(LogType.INFO.toString());
+			log.setContent("");
+
+			BackRequestImpl backRequest = (BackRequestImpl) JSON.parseObject(parameter, BackRequestImpl.class);
+			map.put("backRequest", backRequest);
+
+			${object.upperCaseName} ${object.lowercaseName}Json = (${object.upperCaseName}) JSON.parseObject(parameter, ${object.upperCaseName}.class);
+
+			${object.upperCaseName} ${object.lowercaseName} = ${object.lowercaseName}Service.find(${object.lowercaseName}Json);
+
+			map.put("${object.lowercaseName}", ${object.lowercaseName});
+		} catch (Exception e) {
+			log.setType(LogType.ERROR.toString());
+			log.setContent(e.toString());
+		} finally {
+			try {
+				logService.save(log);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		return new ModelAndView("/${object.lowercaseName}/detail", map);
+	}
+
+	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> save(@RequestBody String parameter, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+		Log log = new Log();
+		log.setHttpSession(session);
+		log.setRequest(request);
+		log.setAction("/${object.lowercaseName}/save");
+		log.setParameter(parameter);
+
+		try {
+			log.setType(LogType.INFO.toString());
+			log.setContent("");
+
+			${object.upperCaseName} ${object.lowercaseName}Json = (${object.upperCaseName}) JSON.parseObject(parameter, ${object.upperCaseName}.class);
+
+			${object.lowercaseName}Service.save(${object.lowercaseName}Json);
+
+			return new BaseResponseImpl(true, "", null).build();
+		} catch (Exception e) {
+			log.setType(LogType.ERROR.toString());
+			log.setContent(e.toString());
+
+			return new BaseResponseImpl(false, e.toString(), null).build();
+		} finally {
+			try {
+				logService.save(log);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@RequestMapping(value = "/update", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> update(@RequestBody String parameter, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+		Log log = new Log();
+		log.setHttpSession(session);
+		log.setRequest(request);
+		log.setAction("/${object.lowercaseName}/update");
+		log.setParameter(parameter);
+
+		try {
+			log.setType(LogType.INFO.toString());
+			log.setContent("");
+
+			${object.upperCaseName} ${object.lowercaseName}Json = (${object.upperCaseName}) JSON.parseObject(parameter, ${object.upperCaseName}.class);
+
+			${object.lowercaseName}Service.update(${object.lowercaseName}Json);
+
+			return new BaseResponseImpl(true, "", null).build();
+		} catch (Exception e) {
+			log.setType(LogType.ERROR.toString());
+			log.setContent(e.toString());
+
+			return new BaseResponseImpl(false, e.toString(), null).build();
+		} finally {
+			try {
+				logService.save(log);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@RequestMapping(value = "/delete", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> delete(@RequestBody String parameter, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+		Log log = new Log();
+		log.setHttpSession(session);
+		log.setRequest(request);
+		log.setAction("/${object.lowercaseName}/delete");
+		log.setParameter(parameter);
+
+		try {
+			log.setType(LogType.INFO.toString());
+			log.setContent("");
+
+			BackRequestImpl backRequest = (BackRequestImpl) JSON.parseObject(parameter, BackRequestImpl.class);
+
+			${object.upperCaseName} ${object.lowercaseName}Parameter = new ${object.upperCaseName}();
+			${object.lowercaseName}Parameter.setIdList(JSON.parseArray(backRequest.getIds(), Integer.class));
+			${object.lowercaseName}Service.delete(${object.lowercaseName}Parameter);
+
+			return new BaseResponseImpl(true, "", null).build();
+		} catch (Exception e) {
+			log.setType(LogType.ERROR.toString());
+			log.setContent(e.toString());
+
+			return new BaseResponseImpl(false, e.toString(), null).build();
+		} finally {
+			try {
+				logService.save(log);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+}

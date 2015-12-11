@@ -1,0 +1,122 @@
+function user_detail_function_saveOrUpdate() {
+	if(user_detail_form.getForm().isValid()) {
+		ajaxRequest({
+<%if(isEmpty(user)) {%>
+url: "/user/save",
+<%}else{%>
+url: "/user/update",
+<%}%>
+
+
+			params: {
+				id: user_detail_form_id.getValue(),
+				name: user_detail_form_name.getValue(),
+				account: user_detail_form_account.getValue(),
+				roleId: user_detail_form_roleId.getValue(),
+				postId: user_detail_form_postId.getValue(),
+				departmentId: user_detail_form_departmentId.getValue()
+			},
+			success: function(response) {
+				user_detail_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}();
+				<%}%>
+			}
+		});
+	}
+}
+
+function user_detail_function_close() {
+	user_detail.close();
+}
+
+var user_detail_save = Ext.create("N_Button", {
+	id: "user_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		user_detail_function_saveOrUpdate();
+	}
+});
+
+var user_detail_close = Ext.create("N_Button", {
+	id: "user_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		user_detail_function_close();
+	}
+});
+
+var user_detail_form_id = Ext.create("N_Hidden", {
+	id: "user_detail_form_id"
+});
+
+var user_detail_form_name = Ext.create("N_Text", {
+	id: "user_detail_form_name",
+	fieldLabel: "名称",
+	allowBlank: false,
+	enterFunction: user_detail_function_saveOrUpdate
+});
+
+var user_detail_form_account = Ext.create("N_Text", {
+	id: "user_detail_form_account",
+	fieldLabel: "帐号",
+	allowBlank: false,
+	enterFunction: user_detail_function_saveOrUpdate
+});
+
+var user_detail_form_roleId = Ext.create("N_Number", {
+	id: "user_detail_form_roleId",
+	fieldLabel: "角色编号",
+	allowBlank: false,
+	enterFunction: user_detail_function_saveOrUpdate
+});
+
+var user_detail_form_postId = Ext.create("N_Number", {
+	id: "user_detail_form_postId",
+	fieldLabel: "职位编号",
+	allowBlank: false,
+	enterFunction: user_detail_function_saveOrUpdate
+});
+
+var user_detail_form_departmentId = Ext.create("N_Number", {
+	id: "user_detail_form_departmentId",
+	fieldLabel: "部门编号",
+	allowBlank: false,
+	enterFunction: user_detail_function_saveOrUpdate
+});
+
+var user_detail_form = Ext.create("N_Form", {
+	id: "user_detail_form",
+	items: [
+		user_detail_form_id,
+		user_detail_form_name,
+		user_detail_form_account,
+		user_detail_form_roleId,
+		user_detail_form_postId,
+		user_detail_form_departmentId
+	]
+});
+
+var user_detail = Ext.create("N_Window", {
+	id: "user_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+	title: "${backRequest.titleName}",
+	<%}%>
+	<%if(! isEmpty(backRequest.iconCls)) {%>
+	iconCls: "${backRequest.iconCls}",
+	<%}%>
+	tbar: [user_detail_save, "-", user_detail_close],
+	items: [user_detail_form]
+}).show();
+
+<%if(! isEmpty(user)) {%>
+user_detail_form_id.setValue("${user.id}");
+user_detail_form_name.setValue("${user.name}");
+user_detail_form_account.setValue("${user.account}");
+user_detail_form_roleId.setValue("${user.roleId}");
+user_detail_form_postId.setValue("${user.postId}");
+user_detail_form_departmentId.setValue("${user.departmentId}");
+<%}%>

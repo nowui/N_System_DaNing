@@ -1,0 +1,108 @@
+function page_detail_function_saveOrUpdate() {
+	if(page_detail_form.getForm().isValid()) {
+		ajaxRequest({
+			<%if(isEmpty(page)) {%>
+			url: "/page/save",
+			<%}else{%>
+			url: "/page/update",
+			<%}%>
+			params: {
+				id: page_detail_form_id.getValue(),
+				name: page_detail_form_name.getValue(),
+				value: page_detail_form_value.getValue(),
+				content: encodeURIComponent(page_detail_form_content.getValue())
+			},
+			success: function(response) {
+				page_detail_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}();
+				<%}%>
+			}
+		});
+	}
+}
+
+function page_detail_function_close() {
+	page_detail.close();
+}
+
+var page_detail_save = Ext.create("N_Button", {
+	id: "page_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		page_detail_function_saveOrUpdate();
+	}
+});
+
+var page_detail_close = Ext.create("N_Button", {
+	id: "page_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		page_detail_function_close();
+	}
+});
+
+var page_detail_form_id = Ext.create("N_Hidden", {
+	id: "page_detail_form_id"
+});
+
+<%if(isEmpty(page)) {%>
+var page_detail_form_name = Ext.create("N_Text", {
+	id: "page_detail_form_name",
+	fieldLabel: "名称",
+	allowBlank: false,
+	enterFunction: page_detail_function_saveOrUpdate
+});
+
+var page_detail_form_value = Ext.create("N_Text", {
+	id: "page_detail_form_value",
+	fieldLabel: "键值",
+	allowBlank: false,
+	enterFunction: page_detail_function_saveOrUpdate
+});
+<%}else{%>
+var page_detail_form_name = Ext.create("N_Hidden", {
+	id: "page_detail_form_name"
+});
+
+var page_detail_form_value = Ext.create("N_Hidden", {
+	id: "page_detail_form_value"
+});
+<%}%>
+
+var page_detail_form_content = Ext.create("N_HtmlEditor", {
+	id: "page_detail_form_content",
+	fieldLabel: "内容"
+});
+
+var page_detail_form = Ext.create("N_Form", {
+	id: "page_detail_form",
+	items: [
+		page_detail_form_id,
+		page_detail_form_name,
+		page_detail_form_value,
+		page_detail_form_content
+	]
+});
+
+var page_detail = Ext.create("N_Window", {
+	id: "page_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+	title: "${backRequest.titleName}",
+	<%}%>
+	<%if(! isEmpty(backRequest.iconCls)) {%>
+	iconCls: "${backRequest.iconCls}",
+	<%}%>
+	tbar: [page_detail_save, "-", page_detail_close],
+	items: [page_detail_form]
+}).show();
+
+<%if(! isEmpty(page)) {%>
+page_detail_form_id.setValue("${page.id}");
+page_detail_form_name.setValue("${page.name}");
+page_detail_form_value.setValue("${page.value}");
+page_detail_form_content.setValue(decodeURIComponent("${page.content}"));
+<%}%>

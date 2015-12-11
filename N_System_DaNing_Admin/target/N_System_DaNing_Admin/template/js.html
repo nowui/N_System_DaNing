@@ -1,0 +1,12 @@
+Ext.define("M_${object.upperCaseName}", {
+	extend: "Ext.data.Model",
+	fields: [{
+		name: "id",
+		type: "int"
+	<%for(item in object.data) {%>
+	}, {
+		name: "${item.key}",
+		type: "string"
+	<%}%>
+	}]
+});

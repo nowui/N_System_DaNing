@@ -1,0 +1,96 @@
+function variable_help_function_ok() {
+	if(variable_detail_form.getForm().isValid()) {
+		var name = variable_detail_form_name.getValue();
+
+		if(isNullOrEmpty(name)) {
+			return;
+		}
+
+		var variable = new M_Variable({
+			name: variable_detail_form_name.getValue(),
+			type: "NORMAL"<%if(! isEmpty(isRequirement)) {%>,
+			value: variable_detail_form_value.getValue(),
+			compare: variable_detail_form_compare.getValue()<%}%>
+		});
+
+		variable_detail_function_close();
+
+		<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+		${backRequest.closeActionFunction}(variable);
+		<%}%>
+	}
+}
+
+function variable_detail_function_close() {
+	variable_detail.close();
+}
+
+var variable_detail_ok = Ext.create("N_Button", {
+	id: "variable_detail_ok",
+	text: "确定",
+	iconCls: "x-fa fa-check-circle",
+	handler: function() {
+		variable_help_function_ok();
+	}
+});
+
+var variable_detail_close = Ext.create("N_Button", {
+	id: "variable_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		variable_detail_function_close();
+	}
+});
+
+var variable_detail_form_name = Ext.create("N_Text", {
+	id: "variable_detail_form_name",
+	fieldLabel: "名称",
+	allowBlank: false,
+	enterFunction: variable_help_function_ok
+});
+
+<%if(! isEmpty(isRequirement)) {%>
+var variable_detail_form_value = Ext.create("N_Text", {
+	id: "variable_detail_form_value",
+	fieldLabel: "键值",
+	allowBlank: false,
+	enterFunction: variable_help_function_ok
+});
+
+var variable_detail_form_compare_store = Ext.create("Ext.data.Store", {
+	id: "variable_detail_form_compare",
+    fields: ["id", "name"],
+    data : [
+        {"id":"GT", "name":"大于"},
+        {"id":"EQ", "name":"等于"},
+        {"id":"IT", "name":"小于"}
+    ]
+});
+
+var variable_detail_form_compare = Ext.create("N_ComboBox", {
+	id: "variable_detail_form_compare",
+	store: variable_detail_form_compare_store,
+	fieldLabel: "比较",
+	allowBlank: false
+});
+<%}%>
+
+var variable_detail_form = Ext.create("N_Form", {
+	id: "variable_detail_form",
+	items: [
+		variable_detail_form_name<%if(! isEmpty(isRequirement)) {%>,
+		variable_detail_form_value,
+		variable_detail_form_compare<%}%>
+	]
+});
+
+var variable_detail = Ext.create("N_Window", {
+	id: "variable_detail",
+	width: 450,
+	height: 300,
+	title: "属性",
+	iconCls: "x-fa fa-list-ul",
+	tbar: [variable_detail_ok, "-", variable_detail_close],
+	items: [variable_detail_form]
+}).show();

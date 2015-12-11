@@ -1,0 +1,94 @@
+function grade_detail_function_saveOrUpdate() {
+	if(grade_detail_form.getForm().isValid()) {
+		ajaxRequest({
+<%if(isEmpty(grade)) {%>
+url: "/grade/save",
+<%}else{%>
+url: "/grade/update",
+<%}%>
+
+
+			params: {
+				id: grade_detail_form_id.getValue(),
+				name: grade_detail_form_name.getValue(),
+				sort: grade_detail_form_sort.getValue()
+			},
+			success: function(response) {
+				grade_detail_function_close();
+
+<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+${backRequest.closeActionFunction}();
+<%}%>
+
+			}
+		});
+	}
+}
+
+function grade_detail_function_close() {
+	grade_detail.close();
+}
+
+var grade_detail_save = Ext.create("N_Button", {
+	id: "grade_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		grade_detail_function_saveOrUpdate();
+	}
+});
+
+var grade_detail_close = Ext.create("N_Button", {
+	id: "grade_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		grade_detail_function_close();
+	}
+});
+
+var grade_detail_form_id = Ext.create("N_Hidden", {
+	id: "grade_detail_form_id"
+});
+
+var grade_detail_form_name = Ext.create("N_Text", {
+	id: "grade_detail_form_name",
+	fieldLabel: "名称",
+	allowBlank: false,
+	enterFunction: grade_detail_function_saveOrUpdate
+});
+
+var grade_detail_form_sort = Ext.create("N_Number", {
+	id: "grade_detail_form_sort",
+	fieldLabel: "排序",
+	allowBlank: false,
+	enterFunction: grade_detail_function_saveOrUpdate
+});
+
+var grade_detail_form = Ext.create("N_Form", {
+	id: "grade_detail_form",
+	items: [
+		grade_detail_form_id,
+		grade_detail_form_name,
+		grade_detail_form_sort
+	]
+});
+
+var grade_detail = Ext.create("N_Window", {
+	id: "grade_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+title: "${backRequest.titleName}",
+<%}%>
+<%if(! isEmpty(backRequest.iconCls)) {%>
+iconCls: "${backRequest.iconCls}",
+<%}%>
+
+	tbar: [grade_detail_save, "-", grade_detail_close],
+	items: [grade_detail_form]
+}).show();
+
+<%if(! isEmpty(grade)) {%>
+grade_detail_form_id.setValue("${grade.id}");
+grade_detail_form_name.setValue("${grade.name}");
+grade_detail_form_sort.setValue("${grade.sort}");
+<%}%>

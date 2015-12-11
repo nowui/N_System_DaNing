@@ -1,0 +1,101 @@
+package com.nowui.${object.package}.model;
+
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+<%if(object.isLob) {%>
+import javax.persistence.Lob;
+<%}%>
+import javax.persistence.Table;
+<%if(object.isDate) {%>
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.util.Date;
+import com.alibaba.fastjson.annotation.JSONField;
+<%}%>
+import javax.persistence.Transient;
+<%if(object.isLob) {%>
+import org.hibernate.annotations.Type;
+<%}%>
+
+@Entity
+@Table(name = "${object.upperCaseName}_Info")
+public class ${object.upperCaseName} {
+
+	@Id
+	@GeneratedValue
+	private Integer id;
+
+	@Transient
+	private List<Integer> idList;
+
+	<%for(item in object.data) {%>
+		<%if(item.isDatabase) {%>
+			<%if(item.type == "Boolean") {%>
+	@Column(nullable = false<%if(! item.isUpdate) {%>, insertable = true, updatable = false<%}%>, columnDefinition = "TINYINT(1)")
+
+			<%}else if(item.type == "Date") {%>
+	@Temporal(TemporalType.TIMESTAMP)
+	@JSONField (format="yyyy-MM-dd hh:mm:ss")
+	@Column(nullable = false<%if(! item.isUpdate) {%>, insertable = true, updatable = false<%}%>)
+
+
+			<%}else if(item.type == "Lob") {%>
+	@Lob
+	@Type(type = "org.hibernate.type.TextType")
+	@Column(nullable = false<%if(! item.isUpdate) {%>, insertable = true, updatable = false<%}%>)
+
+			<%}else{%>
+	@Column(nullable = false<%if(! item.isUpdate) {%>, insertable = true, updatable = false<%}%>)
+
+			<%}%>
+		<%}else{%>
+	@Transient
+		<%}%>
+		<%if(item.type == "Lob") {%>
+	private String ${item.key};
+		<%}else{%>
+	private ${item.type} ${item.key};
+		<%}%>
+
+	<%}%>
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public List<Integer> getIdList() {
+		return idList;
+	}
+
+	public void setIdList(List<Integer> idList) {
+		this.idList = idList;
+	}
+
+	<%for(item in object.data) {%>
+		<%if(item.type == "Lob") {%>
+	public String get${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}() {
+		<%}else{%>
+	public ${item.type} get${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}() {
+		<%}%>
+		return ${item.key};
+	}
+
+		<%if(item.type == "Lob") {%>
+	public void set${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}(String ${item.key}) {
+		<%}else{%>
+	public void set${strutil.toUpperCase(strutil.subStringTo(item.key, 0, 1)) + strutil.subString(item.key, 1)}(${item.type} ${item.key}) {
+		<%}%>
+		this.${item.key} = ${item.key};
+	}
+
+	<%}%>
+
+}

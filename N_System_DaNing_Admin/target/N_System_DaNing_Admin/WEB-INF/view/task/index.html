@@ -1,0 +1,193 @@
+function task_index_function_load() {
+	task_index_center_grid_model.deselectAll();
+
+	task_type = task_index_north_state.getValue();
+
+	task_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			type: task_type
+		});
+	});
+
+	task_index_center_grid_store.load();
+}
+
+function task_index_function_delete() {
+	var records = task_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/task/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			task_index_function_load();
+		}
+	});
+}
+
+/*var task_index_north_add = Ext.create("N_Button", {
+	id: "task_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/task/add",
+			params: {
+				titleName: Ext.getCmp("tab_task_index").title,
+				iconCls: Ext.getCmp("tab_task_index").iconCls,
+				closeActionFunction: "task_index_function_load"
+			}
+		});
+	}
+});
+
+var task_index_north_delete = Ext.create("N_Button", {
+	id: "task_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		task_index_function_delete();
+	}
+});*/
+
+var task_index_north_refresh = Ext.create("N_Button", {
+	id: "task_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		task_index_function_load();
+	}
+});
+
+var task_index_north_state_store = Ext.create("Ext.data.Store", {
+	id: "task_index_north_state_store",
+    fields: ["id", "name"],
+    data : [
+        {"id":"NO", "name":"未审核"},
+        {"id":"YES", "name":"已审核"}
+    ]
+});
+
+var task_index_north_state = Ext.create("N_ComboBox", {
+	id: "task_index_north_state",
+	store: task_index_north_state_store,
+	fieldLabel: "状态",
+	allowBlank: false,
+    value: "NO"
+});
+
+var task_index_north = Ext.create("N_North", {
+	id: "task_index_north",
+	region: "north",
+	tbar: [
+		/*task_index_north_add,
+		"-",
+		task_index_north_delete,
+		"-",*/
+		task_index_north_refresh
+	],
+	items: [
+		task_index_north_state
+	]
+});
+
+var task_index_center_grid_store = Ext.create("N_Store", {
+	id: "task_index_center_grid_store",
+	model: "M_Task",
+    url: "/task/json"
+});
+
+var task_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "task_index_center_grid_model"
+});
+
+var task_index_center_grid = Ext.create("N_Grid", {
+	id: "task_index_center_grid",
+	store: task_index_center_grid_store,
+	selModel: task_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "instanceType",
+		header: "审批类型",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterTaskType"
+   	}, {
+		dataIndex: "createUserName",
+		header: "申请人",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "createTime",
+		header: "申请时间",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			var url = "";
+			var instanceType = this.getSelectionModel().getLastSelected().get("instanceType");
+
+			if(instanceType == "LEAVE") {
+				url = "/leave/edit";
+			} else if(instanceType == "PURCHASE") {
+				url = "/purchase/edit";
+			} else if(instanceType == "MAINTENANCE") {
+				url = "/maintenance/edit";
+			}
+
+			if(! isNullOrEmpty(url)) {
+				isAudit = true;
+				if(task_type == "YES") {
+					isAudit = false;
+				}
+
+				loadScript({
+					url: url,
+					params: {
+						id: this.getSelectionModel().getLastSelected().get("objectId"),
+						taskId: this.getSelectionModel().getLastSelected().get("id"),
+						isAudit: isAudit,
+						titleName: Ext.getCmp("tab_task_index").title,
+						iconCls: Ext.getCmp("tab_task_index").iconCls,
+						closeActionFunction: "task_index_function_load"
+					}
+				});
+			}
+		}
+	}
+});
+
+var task_index_center = Ext.create("N_Panel", {
+	id: "task_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [task_index_center_grid]
+});
+
+var task_index = Ext.create("N_Panel", {
+	id: "task_index",
+   	layout: "border",
+   	items: [
+   		task_index_north,
+   		task_index_center
+   	]
+});
+
+Ext.getCmp("tab_task_index").add(task_index).updateLayout();
+
+task_index_function_load();

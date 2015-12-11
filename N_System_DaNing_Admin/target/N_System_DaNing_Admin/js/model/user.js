@@ -1,0 +1,46 @@
+Ext.define("M_User", {
+	extend: "Ext.data.Model",
+	fields: [{
+		name: "id",
+		type: "int"
+	}, {
+		name: "type",
+		type: "string"
+	}, {
+		name: "objectId",
+		type: "string"
+	}, {
+		name: "name",
+		type: "string"
+	}, {
+		name: "account",
+		type: "string"
+	}, {
+		name: "password",
+		type: "string"
+	}, {
+		name: "roleId",
+		type: "string"
+	}, {
+		name: "roleName",
+		type: "string"
+	}, {
+		name: "postId",
+		type: "string"
+	}, {
+		name: "postName",
+		type: "string"
+	}, {
+		name: "departmentId",
+		type: "string"
+	}, {
+		name: "departmentName",
+		type: "string"
+	}, {
+		name: "jpushRegistrationId",
+		type: "string"
+	}, {
+		name: "captcha",
+		type: "string"
+	}]
+});

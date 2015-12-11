@@ -1,0 +1,127 @@
+function log_detail_function_saveOrUpdate() {
+	if(log_detail_form.getForm().isValid()) {
+		ajaxRequest({
+<%if(isEmpty(log)) {%>
+url: "/log/save",
+<%}else{%>
+url: "/log/update",
+<%}%>
+
+
+			params: {
+				id: log_detail_form_id.getValue(),
+				type: log_detail_form_type.getValue(),
+				action: log_detail_form_action.getValue(),
+				parameter: log_detail_form_parameter.getValue(),
+				content: encodeURIComponent(log_detail_form_content.getValue()),
+				createTime: log_detail_form_createTime.getValue(),
+				createUserId: log_detail_form_createUserId.getValue()
+			},
+			success: function(response) {
+				log_detail_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}();
+				<%}%>
+			}
+		});
+	}
+}
+
+function log_detail_function_close() {
+	log_detail.close();
+}
+
+var log_detail_save = Ext.create("N_Button", {
+	id: "log_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		log_detail_function_saveOrUpdate();
+	}
+});
+
+var log_detail_close = Ext.create("N_Button", {
+	id: "log_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		log_detail_function_close();
+	}
+});
+
+var log_detail_form_id = Ext.create("N_Hidden", {
+	id: "log_detail_form_id"
+});
+
+var log_detail_form_type = Ext.create("N_Text", {
+	id: "log_detail_form_type",
+	fieldLabel: "类型",
+	allowBlank: false,
+	enterFunction: log_detail_function_saveOrUpdate
+});
+var log_detail_form_action = Ext.create("N_Text", {
+	id: "log_detail_form_action",
+	fieldLabel: "操作",
+	allowBlank: false,
+	enterFunction: log_detail_function_saveOrUpdate
+});
+var log_detail_form_parameter = Ext.create("N_Text", {
+	id: "log_detail_form_parameter",
+	fieldLabel: "参数",
+	allowBlank: false,
+	enterFunction: log_detail_function_saveOrUpdate
+});
+var log_detail_form_content = Ext.create("N_HtmlEditor", {
+	id: "log_detail_form_content",
+	fieldLabel: "内容",
+	allowBlank: false,
+	enterFunction: log_detail_function_saveOrUpdate
+});
+var log_detail_form_createTime = Ext.create("N_Date", {
+	id: "log_detail_form_createTime",
+	fieldLabel: "创建时间",
+	allowBlank: false,
+	enterFunction: log_detail_function_saveOrUpdate
+});
+var log_detail_form_createUserId = Ext.create("N_Number", {
+	id: "log_detail_form_createUserId",
+	fieldLabel: "创建人",
+	allowBlank: false,
+	enterFunction: log_detail_function_saveOrUpdate
+});
+
+var log_detail_form = Ext.create("N_Form", {
+	id: "log_detail_form",
+	items: [
+		log_detail_form_id,
+		log_detail_form_type,
+		log_detail_form_action,
+		log_detail_form_parameter,
+		log_detail_form_content,
+		log_detail_form_createTime,
+		log_detail_form_createUserId
+	]
+});
+
+var log_detail = Ext.create("N_Window", {
+	id: "log_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+	title: "${backRequest.titleName}",
+	<%}%>
+	<%if(! isEmpty(backRequest.iconCls)) {%>
+	iconCls: "${backRequest.iconCls}",
+	<%}%>
+	tbar: [log_detail_save, "-", log_detail_close],
+	items: [log_detail_form]
+}).show();
+
+<%if(! isEmpty(log)) {%>
+log_detail_form_id.setValue("${log.id}");
+log_detail_form_type.setValue("${log.type}");
+log_detail_form_action.setValue("${log.action}");
+log_detail_form_parameter.setValue("${log.parameter}");
+log_detail_form_content.setValue(decodeURIComponent("${log.content}"));
+log_detail_form_createTime.setValue("${log.createTime}");
+log_detail_form_createUserId.setValue("${log.createUserId}");
+<%}%>

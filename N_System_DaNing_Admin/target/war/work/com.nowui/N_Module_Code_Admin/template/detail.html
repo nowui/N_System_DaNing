@@ -1,0 +1,96 @@
+function ${object.lowercaseName}_detail_function_saveOrUpdate() {
+	if(${object.lowercaseName}_detail_form.getForm().isValid()) {
+		ajaxRequest({
+${object.detailSaveOrupdate}
+			params: {
+				id: ${object.lowercaseName}_detail_form_id.getValue(),
+				<%var index = 1;%>
+				<%for(item in object.data) {%>
+					<%if(item.isDatabase && item.isUpdate) {%>
+						<%if(item.type == "Lob") {%>
+				${item.key}: encodeURIComponent(${object.lowercaseName}_detail_form_${item.key}.getValue())<%if(index < object.databaseCount) {%>,<%}%>
+						<%}else{%>
+				${item.key}: ${object.lowercaseName}_detail_form_${item.key}.getValue()<%if(index < object.databaseCount) {%>,<%}%>
+						<%}%>
+					<%index++;%>
+					<%}%>
+				<%}%>
+			},
+			success: function(response) {
+				${object.lowercaseName}_detail_function_close();
+
+${object.closeActionFunction}
+			}
+		});
+	}
+}
+
+function ${object.lowercaseName}_detail_function_close() {
+	${object.lowercaseName}_detail.close();
+}
+
+var ${object.lowercaseName}_detail_save = Ext.create("N_Button", {
+	id: "${object.lowercaseName}_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		${object.lowercaseName}_detail_function_saveOrUpdate();
+	}
+});
+
+var ${object.lowercaseName}_detail_close = Ext.create("N_Button", {
+	id: "${object.lowercaseName}_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		${object.lowercaseName}_detail_function_close();
+	}
+});
+
+var ${object.lowercaseName}_detail_form_id = Ext.create("N_Hidden", {
+	id: "${object.lowercaseName}_detail_form_id"
+});
+
+<%for(item in object.data) {%>
+	<%if(item.isDatabase && item.isUpdate) {%>
+		<%if(item.type == "Integer") {%>
+var ${object.lowercaseName}_detail_form_${item.key} = Ext.create("N_Number", {
+		<%}else if(item.type == "Date") {%>
+var ${object.lowercaseName}_detail_form_${item.key} = Ext.create("N_Date", {
+		<%}else if(item.type == "Lob") {%>
+var ${object.lowercaseName}_detail_form_${item.key} = Ext.create("N_HtmlEditor", {
+		<%}else{%>
+var ${object.lowercaseName}_detail_form_${item.key} = Ext.create("N_Text", {
+		<%}%>
+	id: "${object.lowercaseName}_detail_form_${item.key}",
+	fieldLabel: "${item.name}",
+		<%if(item.isNull) {%>
+	allowBlank: false,
+		<%}%>
+	enterFunction: ${object.lowercaseName}_detail_function_saveOrUpdate
+});
+
+	<%}%>
+<%}%>
+var ${object.lowercaseName}_detail_form = Ext.create("N_Form", {
+	id: "${object.lowercaseName}_detail_form",
+	items: [
+		${object.lowercaseName}_detail_form_id,
+		<%index = 1;%>
+		<%for(item in object.data) {%>
+			<%if(item.isDatabase && item.isUpdate) {%>
+		${object.lowercaseName}_detail_form_${item.key}<%if(index < object.databaseCount) {%>,<%}%>
+			<%index++;%>
+			<%}%>
+		<%}%>
+	]
+});
+
+var ${object.lowercaseName}_detail = Ext.create("N_Window", {
+	id: "${object.lowercaseName}_detail",
+	${object.titleAndIconCls}
+	tbar: [${object.lowercaseName}_detail_save, "-", ${object.lowercaseName}_detail_close],
+	items: [${object.lowercaseName}_detail_form]
+}).show();
+
+${object.detailFind}

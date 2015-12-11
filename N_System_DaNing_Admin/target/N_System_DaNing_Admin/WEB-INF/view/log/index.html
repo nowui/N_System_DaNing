@@ -1,0 +1,176 @@
+function log_index_function_load() {
+	log_index_center_grid_model.deselectAll();
+
+	log_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			type: log_index_north_type.getValue(),
+			action: log_index_north_action.getValue()
+		});
+	});
+
+	log_index_center_grid_store.load();
+}
+
+function log_index_function_delete() {
+	var records = log_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/log/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			log_index_function_load();
+		}
+	});
+}
+
+var log_index_north_add = Ext.create("N_Button", {
+	id: "log_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/log/add",
+			params: {
+				titleName: Ext.getCmp("tab_log_index").title,
+				iconCls: Ext.getCmp("tab_log_index").iconCls,
+				closeActionFunction: "log_index_function_load"
+			}
+		});
+	}
+});
+
+var log_index_north_delete = Ext.create("N_Button", {
+	id: "log_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		log_index_function_delete();
+	}
+});
+
+var log_index_north_refresh = Ext.create("N_Button", {
+	id: "log_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		log_index_function_load();
+	}
+});
+
+var log_index_north_type = Ext.create("N_Text", {
+	id: "log_index_north_type",
+	fieldLabel: "类型",
+	enterFunction: log_index_function_load
+});
+var log_index_north_action = Ext.create("N_Text", {
+	id: "log_index_north_action",
+	fieldLabel: "操作",
+	enterFunction: log_index_function_load
+});
+
+var log_index_north = Ext.create("N_North", {
+	id: "log_index_north",
+	region: "north",
+	tbar: [
+		log_index_north_add,
+		"-",
+		log_index_north_delete,
+		"-",
+		log_index_north_refresh
+	],
+	items: [
+		log_index_north_type,
+		log_index_north_action
+	]
+});
+
+var log_index_center_grid_store = Ext.create("N_Store", {
+	id: "log_index_center_grid_store",
+	model: "M_Log",
+    url: "/log/json"
+});
+
+var log_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "log_index_center_grid_model"
+});
+
+var log_index_center_grid = Ext.create("N_Grid", {
+	id: "log_index_center_grid",
+	store: log_index_center_grid_store,
+	selModel: log_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "type",
+		header: "类型",
+		sorttable: false,
+		width: 150
+   	}, {
+		dataIndex: "action",
+		header: "操作",
+		sorttable: false,
+		width: 150
+   	}, {
+		dataIndex: "parameter",
+		header: "参数",
+		sorttable: false,
+		width: 150
+   	}, {
+		dataIndex: "createTime",
+		header: "创建时间",
+		sorttable: false,
+		width: 150
+   	}, {
+		dataIndex: "createUserId",
+		header: "创建人",
+		sorttable: false,
+		width: 150
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/log/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					titleName: Ext.getCmp("tab_log_index").title,
+					iconCls: Ext.getCmp("tab_log_index").iconCls,
+					closeActionFunction: "log_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var log_index_center = Ext.create("N_Panel", {
+	id: "log_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [log_index_center_grid]
+});
+
+var log_index = Ext.create("N_Panel", {
+	id: "log_index",
+   	layout: "border",
+   	items: [
+   		log_index_north,
+   		log_index_center
+   	]
+});
+
+Ext.getCmp("tab_log_index").add(log_index).updateLayout();
+
+log_index_function_load();

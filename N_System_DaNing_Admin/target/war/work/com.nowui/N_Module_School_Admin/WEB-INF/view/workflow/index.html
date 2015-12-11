@@ -1,0 +1,161 @@
+function workflow_index_function_load() {
+	workflow_index_center_grid_model.deselectAll();
+
+	workflow_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			name: workflow_index_north_name.getValue(),
+		});
+	});
+
+	workflow_index_center_grid_store.load();
+}
+
+function workflow_index_function_delete() {
+	var records = workflow_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/workflow/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			workflow_index_function_load();
+		}
+	});
+}
+
+var workflow_index_north_add = Ext.create("N_Button", {
+	id: "workflow_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/workflow/add",
+			params: {
+				titleName: Ext.getCmp("tab_workflow_index").title,
+				iconCls: Ext.getCmp("tab_workflow_index").iconCls,
+				closeActionFunction: "workflow_index_function_load"
+			}
+		});
+	}
+});
+
+var workflow_index_north_delete = Ext.create("N_Button", {
+	id: "workflow_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		workflow_index_function_delete();
+	}
+});
+
+var workflow_index_north_refresh = Ext.create("N_Button", {
+	id: "workflow_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		workflow_index_function_load();
+	}
+});
+
+var workflow_index_north_name = Ext.create("N_Text", {
+	id: "workflow_index_north_name",
+	fieldLabel: "名称",
+	enterFunction: workflow_index_function_load
+});
+
+var workflow_index_north = Ext.create("N_North", {
+	id: "workflow_index_north",
+	region: "north",
+	tbar: [
+		workflow_index_north_add,
+		"-",
+		workflow_index_north_delete,
+		"-",
+		workflow_index_north_refresh
+	],
+	items: [
+		workflow_index_north_name,
+	]
+});
+
+var workflow_index_center_grid_store = Ext.create("N_Store", {
+	id: "workflow_index_center_grid_store",
+	model: "M_Workflow",
+    url: "/workflow/json"
+});
+
+var workflow_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "workflow_index_center_grid_model"
+});
+
+var workflow_index_center_grid = Ext.create("N_Grid", {
+	id: "workflow_index_center_grid",
+	store: workflow_index_center_grid_store,
+	selModel: workflow_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "value",
+		header: "键值",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterWorkflowType"
+   	}, {
+		dataIndex: "state",
+		header: "状态",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterState"
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/workflow/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					titleName: Ext.getCmp("tab_workflow_index").title,
+					iconCls: Ext.getCmp("tab_workflow_index").iconCls,
+					closeActionFunction: "workflow_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var workflow_index_center = Ext.create("N_Panel", {
+	id: "workflow_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [workflow_index_center_grid]
+});
+
+var workflow_index = Ext.create("N_Panel", {
+	id: "workflow_index",
+   	layout: "border",
+   	items: [
+   		workflow_index_north,
+   		workflow_index_center
+   	]
+});
+
+Ext.getCmp("tab_workflow_index").add(workflow_index).updateLayout();
+
+workflow_index_function_load();

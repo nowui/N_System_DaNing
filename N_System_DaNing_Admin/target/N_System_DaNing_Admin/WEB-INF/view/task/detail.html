@@ -1,0 +1,74 @@
+function task_detail_function_saveOrUpdate() {
+	if(task_detail_form.getForm().isValid()) {
+		ajaxRequest({
+<%if(isEmpty(task)) {%>
+url: "/task/save",
+<%}else{%>
+url: "/task/update",
+<%}%>
+
+
+			params: {
+				id: task_detail_form_id.getValue(),
+			},
+			success: function(response) {
+				task_detail_function_close();
+
+<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+${backRequest.closeActionFunction}();
+<%}%>
+
+			}
+		});
+	}
+}
+
+function task_detail_function_close() {
+	task_detail.close();
+}
+
+var task_detail_save = Ext.create("N_Button", {
+	id: "task_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		task_detail_function_saveOrUpdate();
+	}
+});
+
+var task_detail_close = Ext.create("N_Button", {
+	id: "task_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		task_detail_function_close();
+	}
+});
+
+var task_detail_form_id = Ext.create("N_Hidden", {
+	id: "task_detail_form_id"
+});
+
+var task_detail_form = Ext.create("N_Form", {
+	id: "task_detail_form",
+	items: [
+		task_detail_form_id,
+	]
+});
+
+var task_detail = Ext.create("N_Window", {
+	id: "task_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+title: "${backRequest.titleName}",
+<%}%>
+<%if(! isEmpty(backRequest.iconCls)) {%>
+iconCls: "${backRequest.iconCls}",
+<%}%>
+
+	tbar: [task_detail_save, "-", task_detail_close],
+	items: [task_detail_form]
+}).show();
+
+<%if(! isEmpty(task)) {%>
+task_detail_form_id.setValue("${task.id}");
+<%}%>

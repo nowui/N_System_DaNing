@@ -1,0 +1,159 @@
+function notice_${value}_indexmine_function_load() {
+	notice_${value}_indexmine_center_grid_model.deselectAll();
+
+	notice_${value}_indexmine_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			categoryId: ${categoryId},
+			title: notice_${value}_indexmine_north_title.getValue()
+		});
+	});
+
+	notice_${value}_indexmine_center_grid_store.load();
+}
+
+function notice_${value}_indexmine_function_delete() {
+	var records = notice_${value}_indexmine_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/notice/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			notice_${value}_indexmine_function_load();
+		}
+	});
+}
+
+/*var notice_${value}_indexmine_north_add = Ext.create("N_Button", {
+	id: "notice_${value}_indexmine_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/notice/add",
+			params: {
+				categoryId: ${categoryId},
+				value: "${value}",
+				titleName: Ext.getCmp("tab_notice_${value}_indexmine").title,
+				iconCls: Ext.getCmp("tab_notice_${value}_indexmine").iconCls,
+				closeActionFunction: "notice_${value}_indexmine_function_load"
+			}
+		});
+	}
+});
+
+var notice_${value}_indexmine_north_delete = Ext.create("N_Button", {
+	id: "notice_${value}_indexmine_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		notice_${value}_indexmine_function_delete();
+	}
+});*/
+
+var notice_${value}_indexmine_north_refresh = Ext.create("N_Button", {
+	id: "notice_${value}_indexmine_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		notice_${value}_indexmine_function_load();
+	}
+});
+
+var notice_${value}_indexmine_north_title = Ext.create("N_Text", {
+	id: "notice_${value}_indexmine_north_title",
+	fieldLabel: "标题",
+	enterFunction: notice_${value}_indexmine_function_load
+});
+
+var notice_${value}_indexmine_north = Ext.create("N_North", {
+	id: "notice_${value}_indexmine_north",
+	region: "north",
+	tbar: [
+		/*notice_${value}_indexmine_north_add,
+		"-",
+		notice_${value}_indexmine_north_delete,
+		"-",*/
+		notice_${value}_indexmine_north_refresh
+	],
+	items: [
+		notice_${value}_indexmine_north_title
+	]
+});
+
+var notice_${value}_indexmine_center_grid_store = Ext.create("N_Store", {
+	id: "notice_${value}_indexmine_center_grid_store",
+	model: "M_Notice",
+    url: "/notice/mine/json"
+});
+
+var notice_${value}_indexmine_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "notice_${value}_indexmine_center_grid_model"
+});
+
+var notice_${value}_indexmine_center_grid = Ext.create("N_Grid", {
+	id: "notice_${value}_indexmine_center_grid",
+	store: notice_${value}_indexmine_center_grid_store,
+	selModel: notice_${value}_indexmine_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "title",
+		header: "标题",
+		sorttable: false,
+		width: 300
+   	}, {
+		dataIndex: "createTime",
+		header: "创建时间",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/notice/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					value: "${value}",
+					isEdit: false,
+					titleName: Ext.getCmp("tab_notice_${value}_indexmine").title,
+					iconCls: Ext.getCmp("tab_notice_${value}_indexmine").iconCls,
+					closeActionFunction: "notice_${value}_indexmine_function_load"
+				}
+			});
+		}
+	}
+});
+
+var notice_${value}_indexmine_center = Ext.create("N_Panel", {
+	id: "notice_${value}_indexmine_center",
+	region: "center",
+   	layout: "fit",
+	items: [notice_${value}_indexmine_center_grid]
+});
+
+var notice_${value}_indexmine = Ext.create("N_Panel", {
+	id: "notice_${value}_indexmine",
+   	layout: "border",
+   	items: [
+   		notice_${value}_indexmine_north,
+   		notice_${value}_indexmine_center
+   	]
+});
+
+Ext.getCmp("tab_notice_${value}_indexmine").add(notice_${value}_indexmine).updateLayout();
+
+notice_${value}_indexmine_function_load();

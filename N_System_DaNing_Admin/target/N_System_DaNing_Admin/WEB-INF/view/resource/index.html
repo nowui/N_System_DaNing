@@ -1,0 +1,179 @@
+function resource_index_function_load() {
+	resource_index_center_grid_model.deselectAll();
+
+	resource_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			name: resource_index_north_name.getValue(),
+		});
+	});
+
+	resource_index_center_grid_store.load();
+}
+
+function resource_index_function_delete() {
+	var records = resource_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/resource/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			resource_index_function_load();
+		}
+	});
+}
+
+var resource_index_north_add = Ext.create("N_Button", {
+	id: "resource_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/resource/add",
+			params: {
+				titleName: Ext.getCmp("tab_resource_index").title,
+				iconCls: Ext.getCmp("tab_resource_index").iconCls,
+				closeActionFunction: "resource_index_function_load"
+			}
+		});
+	}
+});
+
+var resource_index_north_delete = Ext.create("N_Button", {
+	id: "resource_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		resource_index_function_delete();
+	}
+});
+
+var resource_index_north_refresh = Ext.create("N_Button", {
+	id: "resource_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		resource_index_function_load();
+	}
+});
+
+var resource_index_north_name = Ext.create("N_Text", {
+	id: "resource_index_north_name",
+	fieldLabel: "名称",
+	enterFunction: resource_index_function_load
+});
+
+var resource_index_north = Ext.create("N_North", {
+	id: "resource_index_north",
+	region: "north",
+	tbar: [
+		resource_index_north_add,
+		"-",
+		resource_index_north_delete,
+		"-",
+		resource_index_north_refresh
+	],
+	items: [
+		resource_index_north_name,
+	]
+});
+
+var resource_index_center_grid_store = Ext.create("N_Store", {
+	id: "resource_index_center_grid_store",
+	model: "M_Resource",
+    url: "/resource/json"
+});
+
+var resource_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "resource_index_center_grid_model"
+});
+
+var resource_index_center_grid = Ext.create("N_Grid", {
+	id: "resource_index_center_grid",
+	store: resource_index_center_grid_store,
+	selModel: resource_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "type",
+		header: "类型",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "value",
+		header: "键值",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "size",
+		header: "大小",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "folderId",
+		header: "文件夹编号",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "createUserId",
+		header: "创建人员",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "createTime",
+		header: "创建时间",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/resource/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					titleName: Ext.getCmp("tab_resource_index").title,
+					iconCls: Ext.getCmp("tab_resource_index").iconCls,
+					closeActionFunction: "resource_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var resource_index_center = Ext.create("N_Panel", {
+	id: "resource_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [resource_index_center_grid]
+});
+
+var resource_index = Ext.create("N_Panel", {
+	id: "resource_index",
+   	layout: "border",
+   	items: [
+   		resource_index_north,
+   		resource_index_center
+   	]
+});
+
+Ext.getCmp("tab_resource_index").add(resource_index).updateLayout();
+
+resource_index_function_load();

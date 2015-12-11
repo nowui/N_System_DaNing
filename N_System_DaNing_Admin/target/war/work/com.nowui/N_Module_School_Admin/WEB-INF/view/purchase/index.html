@@ -1,0 +1,163 @@
+function purchase_index_function_load() {
+	purchase_index_center_grid_model.deselectAll();
+
+	purchase_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+		});
+	});
+
+	purchase_index_center_grid_store.load();
+}
+
+function purchase_index_function_delete() {
+	var records = purchase_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/purchase/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			purchase_index_function_load();
+		}
+	});
+}
+
+var purchase_index_north_add = Ext.create("N_Button", {
+	id: "purchase_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/purchase/add",
+			params: {
+				titleName: Ext.getCmp("tab_purchase_index").title,
+				iconCls: Ext.getCmp("tab_purchase_index").iconCls,
+				closeActionFunction: "purchase_index_function_load"
+			}
+		});
+	}
+});
+
+/*var purchase_index_north_delete = Ext.create("N_Button", {
+	id: "purchase_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		purchase_index_function_delete();
+	}
+});*/
+
+var purchase_index_north_refresh = Ext.create("N_Button", {
+	id: "purchase_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		purchase_index_function_load();
+	}
+});
+
+
+var purchase_index_north = Ext.create("N_North", {
+	id: "purchase_index_north",
+	region: "north",
+	tbar: [
+		purchase_index_north_add,
+		/*"-",
+		purchase_index_north_delete,*/
+		"-",
+		purchase_index_north_refresh
+	],
+	items: [
+	]
+});
+
+var purchase_index_center_grid_store = Ext.create("N_Store", {
+	id: "purchase_index_center_grid_store",
+	model: "M_Purchase",
+    url: "/purchase/json"
+});
+
+var purchase_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "purchase_index_center_grid_model"
+});
+
+var purchase_index_center_grid = Ext.create("N_Grid", {
+	id: "purchase_index_center_grid",
+	store: purchase_index_center_grid_store,
+	selModel: purchase_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "className",
+		header: "班级名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "money",
+		header: "金额",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "createTime",
+		header: "创建时间",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "stepName",
+		header: "流程",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "auditResult",
+		header: "状态",
+		sorttable: false,
+		width: columnWidth,
+		formatter: "formatterFormAuditResult"
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/purchase/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					titleName: Ext.getCmp("tab_purchase_index").title,
+					iconCls: Ext.getCmp("tab_purchase_index").iconCls,
+					closeActionFunction: "purchase_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var purchase_index_center = Ext.create("N_Panel", {
+	id: "purchase_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [purchase_index_center_grid]
+});
+
+var purchase_index = Ext.create("N_Panel", {
+	id: "purchase_index",
+   	layout: "border",
+   	items: [
+   		purchase_index_north,
+   		purchase_index_center
+   	]
+});
+
+Ext.getCmp("tab_purchase_index").add(purchase_index).updateLayout();
+
+purchase_index_function_load();

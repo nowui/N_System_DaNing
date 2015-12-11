@@ -1,0 +1,149 @@
+function page_index_function_load() {
+	page_index_center_grid_model.deselectAll();
+
+	page_index_center_grid_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			name: page_index_north_name.getValue(),
+		});
+	});
+
+	page_index_center_grid_store.load();
+}
+
+function page_index_function_delete() {
+	var records = page_index_center_grid.getSelectionModel().getSelection();
+
+	if(records.length == 0) {
+		return;
+	}
+
+	var ids = [];
+	for(var i = 0; i < records.length; i++) {
+		ids.push(records[i].get("id"));
+	}
+
+	ajaxRequest({
+		url: "/page/delete",
+		params: {
+			ids: Ext.JSON.encode(ids)
+		},
+		success: function(response) {
+			page_index_function_load();
+		}
+	});
+}
+
+var page_index_north_add = Ext.create("N_Button", {
+	id: "page_index_north_add",
+	text: "新增",
+	iconCls: "x-fa fa-plus-circle",
+	handler: function() {
+		loadScript({
+			url: "/page/add",
+			params: {
+				titleName: Ext.getCmp("tab_page_index").title,
+				iconCls: Ext.getCmp("tab_page_index").iconCls,
+				closeActionFunction: "page_index_function_load"
+			}
+		});
+	}
+});
+
+var page_index_north_delete = Ext.create("N_Button", {
+	id: "page_index_north_delete",
+	text: "删除",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		page_index_function_delete();
+	}
+});
+
+var page_index_north_refresh = Ext.create("N_Button", {
+	id: "page_index_north_refresh",
+	text: "刷新",
+	iconCls: "x-fa fa-refresh",
+	handler: function() {
+		page_index_function_load();
+	}
+});
+
+var page_index_north_name = Ext.create("N_Text", {
+	id: "page_index_north_name",
+	fieldLabel: "名称",
+	enterFunction: page_index_function_load
+});
+
+var page_index_north = Ext.create("N_North", {
+	id: "page_index_north",
+	region: "north",
+	tbar: [
+		page_index_north_add,
+		"-",
+		page_index_north_delete,
+		"-",
+		page_index_north_refresh
+	],
+	items: [
+		page_index_north_name,
+	]
+});
+
+var page_index_center_grid_store = Ext.create("N_Store", {
+	id: "page_index_center_grid_store",
+	model: "M_Page",
+    url: "/page/json"
+});
+
+var page_index_center_grid_model = Ext.create("N_CheckboxModel", {
+	id: "page_index_center_grid_model"
+});
+
+var page_index_center_grid = Ext.create("N_Grid", {
+	id: "page_index_center_grid",
+	store: page_index_center_grid_store,
+	selModel: page_index_center_grid_model,
+   	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "name",
+		header: "名称",
+		sorttable: false,
+		width: 150
+   	}],
+	listeners: {
+		itemdblclick: function() {
+			loadScript({
+				url: "/page/edit",
+				params: {
+					id: this.getSelectionModel().getLastSelected().get("id"),
+					titleName: Ext.getCmp("tab_page_index").title,
+					iconCls: Ext.getCmp("tab_page_index").iconCls,
+					closeActionFunction: "page_index_function_load"
+				}
+			});
+		}
+	}
+});
+
+var page_index_center = Ext.create("N_Panel", {
+	id: "page_index_center",
+	region: "center",
+   	layout: "fit",
+	items: [page_index_center_grid]
+});
+
+var page_index = Ext.create("N_Panel", {
+	id: "page_index",
+   	layout: "border",
+   	items: [
+   		page_index_north,
+   		page_index_center
+   	]
+});
+
+Ext.getCmp("tab_page_index").add(page_index).updateLayout();
+
+page_index_function_load();

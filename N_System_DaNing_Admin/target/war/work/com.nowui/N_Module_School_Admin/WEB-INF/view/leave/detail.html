@@ -1,0 +1,292 @@
+function leave_detail_function_saveOrUpdate(isAudit) {
+	if(leave_detail_form.getForm().isValid()) {
+		ajaxRequest({
+			<%if(isEmpty(leave)) {%>
+			url: "/leave/save",
+			<%}else{%>
+			url: "/leave/update",
+			<%}%>
+			params: {
+				id: leave_detail_form_id.getValue(),
+				type: leave_detail_form_type.getValue(),
+				starTime: leave_detail_form_starTime.getValue(),
+				endTime: leave_detail_form_endTime.getValue(),
+				day: leave_detail_form_day.getValue(),
+				content: encodeURIComponent(leave_detail_form_content.getValue()),
+				isAudit: isAudit
+			},
+			success: function(response) {
+				leave_detail_function_close();
+
+				<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+				${backRequest.closeActionFunction}();
+				<%}%>
+
+			}
+		});
+	}
+}
+
+function leave_detail_function_close() {
+	leave_detail.close();
+}
+
+<%if(isEmpty(leave) || leave.instanceState == "START") {%>
+var leave_detail_save = Ext.create("N_Button", {
+	id: "leave_detail_save",
+	text: "保存",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		leave_detail_function_saveOrUpdate();
+	}
+});
+
+var leave_detail_saveAndAudit = Ext.create("N_Button", {
+	id: "leave_detail_saveAndAudit",
+	text: "保存并且提交审核",
+	iconCls: "x-fa fa-save",
+	handler: function() {
+		leave_detail_function_saveOrUpdate(true);
+	}
+});
+<%}%>
+
+<%if(isAudit) {%>
+function leave_detail_function_audit(result) {
+	auditResult = "NO";
+
+	if(result) {
+		auditResult = "YES";
+	}
+
+	Ext.MessageBox.show({
+        title: "审批意见",
+        width: 300,
+        buttonText:{
+            yes: "确定",
+            no: "取消"
+        },
+        multiline: true,
+        scope: this,
+        fn: leave_detail_function_audit_submit
+    });
+}
+
+function leave_detail_function_audit_submit(btn, text) {
+	if(btn == "no") {
+		return;
+	}
+
+	var auditMessage = text;
+
+	ajaxRequest({
+		url: "/task/audit",
+		params: {
+			id: ${taskId},
+			auditResult: auditResult,
+			auditMessage: auditMessage
+		},
+		success: function(response) {
+			leave_detail_function_close();
+
+			<%if(! isEmpty(backRequest.closeActionFunction)) {%>
+			${backRequest.closeActionFunction}();
+			<%}%>
+
+		}
+	});
+}
+
+var leave_detail_yes = Ext.create("N_Button", {
+	id: "leave_detail_yes",
+	text: "同意",
+	iconCls: "x-fa fa-check-circle",
+	handler: function() {
+		leave_detail_function_audit(true);
+	}
+});
+
+var leave_detail_no = Ext.create("N_Button", {
+	id: "leave_detail_no",
+	text: "拒绝",
+	iconCls: "x-fa fa-minus-circle",
+	handler: function() {
+		leave_detail_function_audit(false);
+	}
+});
+<%}%>
+
+var leave_detail_close = Ext.create("N_Button", {
+	id: "leave_detail_close",
+	text: "关闭",
+	iconCls: "x-fa fa-times-circle",
+	handler: function() {
+		leave_detail_function_close();
+	}
+});
+
+var leave_detail_form_id = Ext.create("N_Hidden", {
+	id: "leave_detail_form_id"
+});
+
+var leave_detail_form_type_store = Ext.create("Ext.data.Store", {
+	id: "leave_detail_form_type_store",
+    fields: ["id", "name"],
+    data : [
+        {"id":"SJ", "name":"事假"},
+        {"id":"BJ", "name":"病假"},
+        {"id":"NJ", "name":"年假"},
+        {"id":"TX", "name":"调休"},
+        {"id":"HJ", "name":"婚假"},
+        {"id":"CJ", "name":"产假"}
+    ]
+});
+
+var leave_detail_form_type = Ext.create("N_ComboBox", {
+	id: "leave_detail_form_type",
+	store: leave_detail_form_type_store,
+	fieldLabel: "状态",
+	allowBlank: false
+});
+
+var leave_detail_form_starTime = Ext.create("N_Date", {
+	id: "leave_detail_form_starTime",
+	fieldLabel: "开始时间",
+	allowBlank: false,
+	enterFunction: leave_detail_function_saveOrUpdate
+});
+
+var leave_detail_form_endTime = Ext.create("N_Date", {
+	id: "leave_detail_form_endTime",
+	fieldLabel: "结束时间",
+	allowBlank: false,
+	enterFunction: leave_detail_function_saveOrUpdate
+});
+
+var leave_detail_form_day = Ext.create("N_Number", {
+	id: "leave_detail_form_day",
+	fieldLabel: "天数",
+	allowBlank: false,
+	allowDecimals: true,
+	decimalPrecision: 1,
+	value: "",
+	enterFunction: leave_detail_function_saveOrUpdate
+});
+
+var leave_detail_form_content = Ext.create("N_TextArea", {
+	id: "leave_detail_form_content",
+	fieldLabel: "理由",
+	allowBlank: false,
+	width: "100%",
+	height: 150
+});
+
+<%if(! isEmpty(leave) && ((leave.instanceState != "START" || (leave.instanceState == "START" && leave.auditResult == "NO")))) {%>
+var leave_detail_form_workflow_store = Ext.create("N_Store", {
+	id: "leave_detail_form_workflow_store",
+	model: "M_History",
+    url: "/history/json"
+});
+
+function leave_detail_function_workflow_store_load() {
+	leave_detail_form_workflow_store.on("beforeload", function(store, options) {
+		Ext.apply(store.proxy.extraParams, {
+			instanceId: ${leave.instanceId}
+		});
+	});
+
+	leave_detail_form_workflow_store.load();
+}
+
+leave_detail_function_workflow_store_load();
+
+var leave_detail_form_workflow = Ext.create("N_Grid", {
+	id: "leave_detail_form_workflow",
+	store: leave_detail_form_workflow_store,
+	width: "100%",
+	height: 230,
+	isShowPage: false,
+	columns: [{
+		dataIndex: "id",
+		header: "编号",
+		sorttable: false,
+		hidden: true
+   	}, {
+		dataIndex: "stepName",
+		header: "名称",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "userName",
+		header: "人员",
+		sorttable: false,
+		width: columnWidth
+   	}, {
+		dataIndex: "auditResult",
+		header: "意见",
+		sorttable: false,
+		flex: 1
+   	}, {
+		dataIndex: "createTime",
+		header: "时间",
+		sorttable: false,
+		width: columnWidth
+   	}],
+	listeners: {
+		itemdblclick: function() {
+
+		}
+	}
+});
+<%}%>
+
+var leave_detail_form = Ext.create("N_Form", {
+	id: "leave_detail_form",
+	items: [
+		leave_detail_form_id,
+		leave_detail_form_type,
+		leave_detail_form_starTime,
+		leave_detail_form_endTime,
+		leave_detail_form_day,
+		leave_detail_form_content<%if(! isEmpty(leave) && ((leave.instanceState != "START" || (leave.instanceState == "START" && leave.auditResult == "NO")))) {%>,
+		{
+			layout: "hbox",
+			margin: "0 0 10 0",
+			items: [{
+				xtype: "label",
+				margin: '10 0 0 0',
+				width: 75,
+				text: "流程"
+			}, {
+				flex: 1,
+				style: {
+					border: "1px",
+				    borderColor: "#d0d0d0",
+				    borderStyle: "solid"
+				},
+				items: [leave_detail_form_workflow]
+			}]
+		}<%}%>
+	]
+});
+
+var leave_detail = Ext.create("N_Window", {
+	id: "leave_detail",
+	<%if(! isEmpty(backRequest.titleName)) {%>
+	title: "${backRequest.titleName}",
+	<%}%>
+	<%if(! isEmpty(backRequest.iconCls)) {%>
+	iconCls: "${backRequest.iconCls}",
+	<%}%>
+	tbar: [<%if(isEmpty(leave) || leave.instanceState == "START") {%>leave_detail_save, "-", leave_detail_saveAndAudit, "-", <%}%><%if(isAudit) {%>leave_detail_yes, "-", leave_detail_no, "-", <%}%>leave_detail_close],
+	items: [leave_detail_form]
+}).show();
+
+<%if(! isEmpty(leave)) {%>
+leave_detail_form_id.setValue("${leave.id}");
+leave_detail_form_type.setValue("${leave.type}");
+leave_detail_form_starTime.setValue("${leave.starTime}".substring(0, 10));
+leave_detail_form_endTime.setValue("${leave.endTime}".substring(0, 10));
+leave_detail_form_content.setValue(decodeURIComponent("${leave.content}"));
+leave_detail_form_day.setValue(decodeURIComponent("${leave.day}"));
+<%}%>

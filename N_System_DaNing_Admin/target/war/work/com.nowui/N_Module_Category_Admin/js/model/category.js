@@ -1,0 +1,40 @@
+Ext.define("M_Category", {
+	extend: "Ext.data.Model",
+	fields: [{
+		name: "id",
+		type: "int"
+	}, {
+		name: "parentId",
+		type: "string"
+	}, {
+		name: "name",
+		type: "string"
+	}, {
+		name: "value",
+		type: "string"
+	}, {
+		name: "value1",
+		type: "string"
+	}, {
+		name: "value2",
+		type: "string"
+	}, {
+		name: "value3",
+		type: "string"
+	}, {
+		name: "picture",
+		type: "string"
+	}, {
+		name: "summary",
+		type: "string"
+	}, {
+		name: "content",
+		type: "string"
+	}, {
+		name: "sort",
+		type: "string"
+	}, {
+		name: "path",
+		type: "string"
+	}]
+});
