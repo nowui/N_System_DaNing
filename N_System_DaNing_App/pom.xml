@@ -21,6 +21,30 @@
 
 		<dependency>
 	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_Log_Service</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_Category_Service</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_CMS_Service</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
+	  		<artifactId>N_Module_School_Service</artifactId>
+	  		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+	  		<groupId>com.nowui</groupId>
 	  		<artifactId>N_Common_Web</artifactId>
 	  		<version>0.0.1-SNAPSHOT</version>
       		<type>war</type>

@@ -9,7 +9,7 @@ function leave_detail_function_saveOrUpdate(isAudit) {
 			params: {
 				id: leave_detail_form_id.getValue(),
 				type: leave_detail_form_type.getValue(),
-				starTime: leave_detail_form_starTime.getValue(),
+				startTime: leave_detail_form_startTime.getValue(),
 				endTime: leave_detail_form_endTime.getValue(),
 				day: leave_detail_form_day.getValue(),
 				content: encodeURIComponent(leave_detail_form_content.getValue()),
@@ -149,8 +149,8 @@ var leave_detail_form_type = Ext.create("N_ComboBox", {
 	allowBlank: false
 });
 
-var leave_detail_form_starTime = Ext.create("N_Date", {
-	id: "leave_detail_form_starTime",
+var leave_detail_form_startTime = Ext.create("N_Date", {
+	id: "leave_detail_form_startTime",
 	fieldLabel: "开始时间",
 	allowBlank: false,
 	enterFunction: leave_detail_function_saveOrUpdate
@@ -245,7 +245,7 @@ var leave_detail_form = Ext.create("N_Form", {
 	items: [
 		leave_detail_form_id,
 		leave_detail_form_type,
-		leave_detail_form_starTime,
+		leave_detail_form_startTime,
 		leave_detail_form_endTime,
 		leave_detail_form_day,
 		leave_detail_form_content<%if(! isEmpty(leave) && ((leave.instanceState != "START" || (leave.instanceState == "START" && leave.auditResult == "NO")))) {%>,
@@ -285,7 +285,7 @@ var leave_detail = Ext.create("N_Window", {
 <%if(! isEmpty(leave)) {%>
 leave_detail_form_id.setValue("${leave.id}");
 leave_detail_form_type.setValue("${leave.type}");
-leave_detail_form_starTime.setValue("${leave.starTime}".substring(0, 10));
+leave_detail_form_startTime.setValue("${leave.startTime}".substring(0, 10));
 leave_detail_form_endTime.setValue("${leave.endTime}".substring(0, 10));
 leave_detail_form_content.setValue(decodeURIComponent("${leave.content}"));
 leave_detail_form_day.setValue(decodeURIComponent("${leave.day}"));
