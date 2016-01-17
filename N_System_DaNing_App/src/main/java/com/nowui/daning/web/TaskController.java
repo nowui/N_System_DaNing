@@ -86,14 +86,12 @@ public class TaskController {
 
 			JSONObject jsonObject = JSON.parseObject(parameter);
 
-			Integer total = 0;
 			List<Task> taskList;
 
 			if(jsonObject.getString("type").equals("NO")) {
 				Task taskJson = (Task) JSON.parseObject(parameter, Task.class);
 				taskJson.setUserId(userId);
 
-				total = taskService.count(taskJson);
 				taskList = taskService.findList(taskJson, backRequest.getPage(), backRequest.getLimit());
 			} else {
 				History historyParameter = new History();
@@ -112,7 +110,6 @@ public class TaskController {
 				Instance instanceParameter = new Instance();
 				instanceParameter.setIdList(instanceIdList);
 
-				total = instanceService.count(instanceParameter);
 				List<Instance> instanceList = instanceService.findList(instanceParameter, backRequest.getPage(), backRequest.getLimit());
 
 				taskList = new ArrayList<Task>();
@@ -130,7 +127,7 @@ public class TaskController {
 				}
 			}
 
-			return new BaseResponseImpl(true, "", total, taskList).build();
+			return new BaseResponseImpl(true, "", taskList).build();
 		} catch (Exception e) {
 			log.setType(LogType.ERROR.toString());
 			log.setContent(e.toString());

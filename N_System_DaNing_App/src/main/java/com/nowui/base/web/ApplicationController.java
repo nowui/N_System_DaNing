@@ -22,6 +22,7 @@ import com.nowui.module.model.Category;
 import com.nowui.module.model.Log;
 import com.nowui.module.model.LogType;
 import com.nowui.module.model.Notice;
+import com.nowui.module.model.Task;
 import com.nowui.module.model.User;
 import com.nowui.module.service.CategoryService;
 import com.nowui.module.service.LogService;
@@ -115,6 +116,11 @@ public class ApplicationController {
 
 			User user = userService.find(userParameter);
 
+			Task taskJson = (Task) JSON.parseObject(parameter, Task.class);
+			taskJson.setUserId(userId);
+
+			Integer taskCount = taskService.count(taskJson);
+
 			Category noticeCategoryParameter = new Category();
 			noticeCategoryParameter.setValue("category_notice");
 			Category noticeCategory = categoryService.find(noticeCategoryParameter);
@@ -138,7 +144,7 @@ public class ApplicationController {
 			Integer meetingCount = noticeService.count(meetingParameter);
 
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("taskCount", 0);
+			map.put("taskCount", taskCount);
 			map.put("noticeCount", noticeCount);
 			map.put("meetingCount", meetingCount);
 

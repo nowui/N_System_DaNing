@@ -16,6 +16,7 @@ var ActionSetBackAndRefresh = "setBackAndRefresh";
 var ActionSetClickHeaderRightButton = "setClickHeaderRightButton";
 var ActionSetPreviewImage = "setPreviewImage";
 var ActionGetAlert = "getAlert";
+var ActionSetApplicationIconBadgeNumber = "setApplicationIconBadgeNumber";
 
 var CookieAccount = "Account";
 var CookieUserId = "UserId";

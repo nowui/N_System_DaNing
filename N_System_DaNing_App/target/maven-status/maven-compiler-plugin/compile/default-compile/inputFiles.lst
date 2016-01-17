@@ -1,4 +1,5 @@
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/base/web/ApplicationController.java
+/Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/ClassController.java
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/CloudController.java
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/HistoryController.java
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/LibraryController.java
@@ -6,6 +7,7 @@
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/PageController.java
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/PurchaseController.java
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/LogisticsController.java
+/Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/MaintenanceController.java
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/NoticeController.java
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/ScoreController.java
 /Users/yongqiangzhong/Documents/Workspace/Java_System/N_System_DaNing/N_System_DaNing_App/src/main/java/com/nowui/daning/web/WorkFlowController.java

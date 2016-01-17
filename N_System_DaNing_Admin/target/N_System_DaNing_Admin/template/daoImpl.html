@@ -1,4 +1,4 @@
-package com.nowui.module.dao.impl;
+package com.nowui.${object.package}.dao.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,8 +19,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nowui.base.utility.Helper;
-import com.nowui.module.dao.${object.upperCaseName}Dao;
-import com.nowui.module.model.${object.upperCaseName};
+import com.nowui.${object.package}.dao.${object.upperCaseName}Dao;
+import com.nowui.${object.package}.model.${object.upperCaseName};
 
 @Repository("${object.lowercaseName}Dao")
 public class ${object.upperCaseName}DaoImpl implements ${object.upperCaseName}Dao {

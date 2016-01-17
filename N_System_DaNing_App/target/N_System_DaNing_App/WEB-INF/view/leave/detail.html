@@ -50,15 +50,6 @@
 			</div>
 		</ion-item>
 	</ion-list>
-	<div style="margin:30px;" ng-show="! isSubmit">
-		<ol class="timeline">
-			<li class="tl-node" ng-repeat="history in historyList">
-				<div class="tl-stamp">{{history.createTime}}</div>
-				<div class="tl-content">{{history.stepName}}</div>
-				<div>{{history.userName}}: {{history.auditResult}}</div>
-			</li>
-		</ol>
-	</div>
     <div style="margin-top:30px;" ng-show="isSubmit" class="row">
     	<div class="col">
         	<button class="button button-full button-positive" ng-click="saveOrUpdate(false);">保存</button>
@@ -75,6 +66,15 @@
         	<button class="button button-full button-positive" ng-click="clickAudit('NO');">拒绝</button>
     	</div>
     </div>
+	<div style="margin:30px;" ng-show="! isSubmit">
+		<ol class="timeline">
+			<li class="tl-node" ng-repeat="history in historyList">
+				<div class="tl-stamp">{{history.createTime}}</div>
+				<div class="tl-content">{{history.stepName}}</div>
+				<div>{{history.userName}}: {{history.auditResult}}</div>
+			</li>
+		</ol>
+	</div>
 </body>
 
 </html>
@@ -144,10 +144,6 @@ var app = angular.module("App", ["ionic", "ngCookies", "tagged.directives.infini
     	}]
 
 		init = function() {
-			if(! $scope.isAudit) {
-				return;
-			}
-
 			$scope.isSubmit = true;
 
 			$timeout(function() {
@@ -213,7 +209,9 @@ var app = angular.module("App", ["ionic", "ngCookies", "tagged.directives.infini
 					$scope.leave.content = decodeURIComponent(response.data.content);
 
 					if(response.data.instanceState == "START") {
-						init();
+						if(! $scope.isAudit && response.data.userId == userId) {
+							init();
+						}
 					}
 
 					loadHistory(response.data.instanceId);
@@ -304,7 +302,7 @@ var app = angular.module("App", ["ionic", "ngCookies", "tagged.directives.infini
 				      	duration: WaitDelay
 				    });
 
-					$timeout(function(){
+					$timeout(function() {
 						window.location.href = "webviewplus://" + encodeURIComponent("{\"action\":\"" + ActionSetBackAndRefresh + "\",\"data\":{}}");
 				    }, WaitDelay);
 				} else {

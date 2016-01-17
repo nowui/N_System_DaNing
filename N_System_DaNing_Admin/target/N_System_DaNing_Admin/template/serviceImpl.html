@@ -1,4 +1,4 @@
-package com.nowui.module.service.impl;
+package com.nowui.${object.package}.service.impl;
 
 <%if(object.isDate) {%>
 import java.util.Date;
@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nowui.base.utility.Helper;
-import com.nowui.module.dao.${object.upperCaseName}Dao;
-import com.nowui.module.model.${object.upperCaseName};
-import com.nowui.module.service.${object.upperCaseName}Service;
+import com.nowui.${object.package}.dao.${object.upperCaseName}Dao;
+import com.nowui.${object.package}.model.${object.upperCaseName};
+import com.nowui.${object.package}.service.${object.upperCaseName}Service;
 
 @Service("${object.lowercaseName}Service")
 public class ${object.upperCaseName}ServiceImpl implements ${object.upperCaseName}Service {

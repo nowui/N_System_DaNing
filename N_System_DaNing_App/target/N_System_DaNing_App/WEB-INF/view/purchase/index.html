@@ -42,11 +42,11 @@ var app = angular.module("App", ["ionic", "ngCookies", "tagged.directives.infini
         });
 
         if(isApp) {
-			window.location.href = "webviewplus://" + encodeURIComponent("{\"action\":\"" + ActionSetTitle + "\",\"data\":{\"text\":\"我的请假\",\"right\":\"新增\"}}");
+			window.location.href = "webviewplus://" + encodeURIComponent("{\"action\":\"" + ActionSetTitle + "\",\"data\":{\"text\":\"我的采购\",\"right\":\"新增\"}}");
 		}
 
 		setClickHeaderRightButton = function(payload) {
-			window.location.href = "/purchase/detail.html"
+			window.location.href = "/purchase/detail.html";
 		}
 
 		setBackAndRefresh = function(payload) {

@@ -116,7 +116,7 @@
 					</div>
 				</div>
 				<div class="col">
-					<button class="button button-positive" style="width:50px; height:50px; border-radius:25px; display: block; margin-left: auto; margin-right: auto; background-color: #92cab1;">
+					<button class="button button-positive" style="width:50px; height:50px; border-radius:25px; display: block; margin-left: auto; margin-right: auto; background-color: #92cab1;" ng-click="clickMaintenance();">
 				      <i class="icon material-icons" style="height:50px; line-height:50px; text-align:center;">&#xe8d1;</i>
 				    </button>
 				    <div style="text-align:center; margin-top:10px;">
@@ -210,6 +210,10 @@ var app = angular.module("App", ["ionic", "ngCookies"])
 					$scope.taskCount = response.data.taskCount;
 					$scope.noticeCount = response.data.noticeCount;
 					$scope.meetingCount = response.data.meetingCount;
+
+					$timeout(function() {
+						window.location.href = "webviewplus://" + encodeURIComponent("{\"action\":\"" + ActionSetApplicationIconBadgeNumber + "\",\"data\":{\"number\": " + (Number($scope.taskCount) + Number($scope.noticeCount) + Number($scope.meetingCount)) + "}}");
+				    }, 1);
 				}
 			});
 		}
@@ -250,6 +254,10 @@ var app = angular.module("App", ["ionic", "ngCookies"])
 
 		$scope.clickPurchase = function() {
 			window.location.href = "/purchase/index.html";
+		}
+
+		$scope.clickMaintenance = function() {
+			window.location.href = "/maintenance/index.html";
 		}
 
 		if(isApp) {

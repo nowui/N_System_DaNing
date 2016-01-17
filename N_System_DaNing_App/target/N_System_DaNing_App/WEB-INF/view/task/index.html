@@ -100,7 +100,7 @@ var app = angular.module("App", ["ionic", "ngCookies", "tagged.directives.infini
 					for (var i = 0; i < list.length; i++) {
 						var task = list[i];
 
-						task.createTime = task.createTime.substring(0, 10);
+						task.createTime = new Date(task.createTime).Format("yyyy-MM-dd");
 						task.instanceName = "";
 						task.url = "";
 
