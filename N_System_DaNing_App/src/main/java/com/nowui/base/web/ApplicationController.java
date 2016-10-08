@@ -67,6 +67,13 @@ public class ApplicationController {
 		return new ModelAndView("/index", map);
 	}
 
+	@RequestMapping(value = "/index2", method = RequestMethod.GET)
+	public ModelAndView index2(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		return new ModelAndView("/index2", map);
+	}
+
 	@RequestMapping(value = "/application", method = RequestMethod.GET)
 	public ModelAndView application(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
 

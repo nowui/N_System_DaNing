@@ -387,7 +387,7 @@
 						 	return;
 						}
 
-						var itemId =  "tab_" + record.raw.value;
+						/*var itemId =  "tab_" + record.raw.value;
 
 						if(Ext.getCmp(itemId)) {
 							system_index_center.setActiveTab(itemId);
@@ -418,7 +418,36 @@
 	    						iconCls: record.raw.iconCls,
 	    						params: record.raw.params
 	    					});
-						}
+						}*/
+
+						system_index_center.removeAll();
+
+						var tabPanel = system_index_center.add({
+							id: "tab_" + record.raw.value,
+    						title: record.raw.text,
+    					   	iconCls: record.raw.iconCls,
+    					   	closable: false,
+    					   	layout: "fit",
+    						listeners: {
+    							beforeclose: function() {
+									system_index_center.remove(Ext.getCmp(id));
+    							}
+    						}
+    					});
+
+    					system_index_center.setActiveTab(tabPanel);
+
+    					Ext.apply(record.raw.params, {
+							titleName: record.raw.text,
+							iconCls: record.raw.iconCls
+						});
+
+    					loadScript({
+    						id: id,
+    						url: record.raw.url,
+    						iconCls: record.raw.iconCls,
+    						params: record.raw.params
+    					});
 					}
         		}
         	}

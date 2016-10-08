@@ -82,7 +82,7 @@ public class ArticleController {
 		Log log = new Log();
 		log.setHttpSession(session);
 		log.setRequest(request);
-		log.setAction("/portal/list");
+		log.setAction("/article/list");
 		log.setParameter(parameter);
 		log.setType(LogType.INFO.toString());
 		log.setContent("");
@@ -125,7 +125,7 @@ public class ArticleController {
 		Log log = new Log();
 		log.setHttpSession(session);
 		log.setRequest(request);
-		log.setAction("/portal/find");
+		log.setAction("/article/find");
 		log.setParameter(parameter);
 		log.setType(LogType.INFO.toString());
 		log.setContent("");
